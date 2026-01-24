@@ -13,52 +13,40 @@ import aiRouter from "./routes/aiRoute.js";
 
 const app = express();
 
-/* ===============================
-   Middleware
-================================ */
+// ===============================
+// Middlewares
+// ===============================
 app.use(cors());
 app.use(express.json());
 
-/* ===============================
-   DB & Services (safe for Vercel)
-================================ */
-let isConnected = false;
+// ===============================
+// Init services ONCE (safe)
+// ===============================
+try {
+  await connectDB();
+  connectCloudinary();
+  console.log("Services initialized");
+} catch (err) {
+  console.error("Startup error:", err.message);
+}
 
-const initServices = async () => {
-  if (!isConnected) {
-    await connectDB();
-    connectCloudinary();
-    isConnected = true;
-  }
-};
-
-app.use(async (req, res, next) => {
-  try {
-    await initServices();
-    next();
-  } catch (error) {
-    console.error("Init error:", error);
-    res.status(500).json({ message: "Server initialization failed" });
-  }
-});
-
-/* ===============================
-   Routes
-================================ */
+// ===============================
+// Routes
+// ===============================
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/ai", aiRouter);
 
-/* ===============================
-   Health Check
-================================ */
+// ===============================
+// Health check
+// ===============================
 app.get("/", (req, res) => {
   res.send("API Working 🚀");
 });
 
-/* ===============================
-   Export (NO app.listen)
-================================ */
+// ===============================
+// Export for Vercel
+// ===============================
 export default app;

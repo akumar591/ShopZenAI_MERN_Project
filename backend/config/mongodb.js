@@ -1,11 +1,22 @@
 import mongoose from "mongoose";
 
-const connectDB = async () => {
-    try {
-       await mongoose.connect(process.env.MONGODB_URI);
-       console.log('mongodb connected successfully.');
-    } catch (error) {
-        console.log(error);
-    }
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
+
+const connectDB = async () => {
+  if (cached.conn) return cached.conn;
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(process.env.MONGO_URI, {
+      bufferCommands: false,
+    });
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+};
+
 export default connectDB;
