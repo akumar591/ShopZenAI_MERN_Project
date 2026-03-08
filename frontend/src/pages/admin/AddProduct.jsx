@@ -16,13 +16,26 @@ const AddProduct = () => {
     price: "",
     category: "",
     subCategory: "",
-    sizes: "",
+    sizes: [],
   });
 
   const [images, setImages] = useState({});
   const [previews, setPreviews] = useState({});
 
-  /* ================= IMAGE + AI ================= */
+  const showMessage = (msg) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const toggleSize = (size) => {
+    setForm((prev) => ({
+      ...prev,
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter((s) => s !== size)
+        : [...prev.sizes, size],
+    }));
+  };
+
   const handleImage = async (key, file) => {
     if (!file) return;
 
@@ -32,16 +45,18 @@ const AddProduct = () => {
     if (key === "image1") {
       try {
         setAiLoading(true);
+
         const fd = new FormData();
         fd.append("image", file);
 
         const res = await axios.post(
-          "http://localhost:4000/api/ai/scan-image",
+          "http://localhost:5000/api/ai/scan-image",
           fd
         );
 
         if (res.data?.success) {
           const ai = res.data.result;
+
           setForm((f) => ({
             ...f,
             name: ai.name || f.name,
@@ -49,10 +64,11 @@ const AddProduct = () => {
             category: ai.category || f.category,
             subCategory: ai.subCategory || f.subCategory,
           }));
-          setMessage("AI filled product details");
+
+          showMessage("AI filled product details");
         }
       } catch {
-        setMessage("AI scan failed");
+        showMessage("AI scan failed");
       } finally {
         setAiLoading(false);
       }
@@ -61,59 +77,77 @@ const AddProduct = () => {
 
   const removeImage = (key) => {
     setImages((p) => {
-      const o = { ...p };
-      delete o[key];
-      return o;
+      const obj = { ...p };
+      delete obj[key];
+      return obj;
     });
+
     setPreviews((p) => {
-      const o = { ...p };
-      delete o[key];
-      return o;
+      const obj = { ...p };
+      delete obj[key];
+      return obj;
     });
   };
 
-  /* ================= SAVE ================= */
   const handleSave = async () => {
     try {
       setLoading(true);
+
       const token = localStorage.getItem("adminToken");
 
       const data = new FormData();
-      Object.entries(form).forEach(([k, v]) => data.append(k, v));
+
+      Object.entries(form).forEach(([k, v]) => {
+        if (k === "sizes") {
+          data.append("sizes", JSON.stringify(v));
+        } else {
+          data.append(k, v);
+        }
+      });
+
       Object.keys(images).forEach((k) => data.append(k, images[k]));
 
       const res = await axios.post(
-        "http://localhost:4000/api/product/add",
+        "http://localhost:5000/api/product/add",
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {
-        setMessage("Product published successfully");
+        showMessage("Product published successfully");
+
         setForm({
           name: "",
           description: "",
           price: "",
           category: "",
           subCategory: "",
-          sizes: "",
+          sizes: [],
         });
+
         setImages({});
         setPreviews({});
       }
     } catch {
-      setMessage("Failed to save product");
+      showMessage("Failed to save product");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-gray-100 flex flex-col">
+    <div className="min-h-screen bg-[#0f172a] text-white flex flex-col">
 
-      {/* TOP BAR */}
+      {message && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50">
+          <div className="bg-green-600 px-6 py-2 rounded-md shadow-lg text-sm font-semibold">
+            {message}
+          </div>
+        </div>
+      )}
+
       <div className="h-14 px-4 sm:px-6 flex items-center justify-between border-b border-white/10">
-        <h1 className="font-semibold tracking-wide text-sm sm:text-base">
+        <h1 className="font-semibold text-sm sm:text-base">
           Add Product <span className="text-indigo-400">• Draft</span>
         </h1>
 
@@ -126,127 +160,120 @@ const AddProduct = () => {
         </button>
       </div>
 
-      {/* MAIN */}
-      <div className="flex-1 overflow-hidden">
-        <div className="flex flex-col lg:flex-row h-full">
+      <div className="flex flex-col lg:flex-row flex-1">
 
-          {/* IMAGES – TOP ON MOBILE */}
-          <div className="order-1 lg:order-2 w-full lg:w-[45%] border-b lg:border-b-0 lg:border-l border-white/10 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-            <h2 className="text-xs uppercase tracking-widest text-gray-400 mb-4">
-              Product Media
-            </h2>
+        <div className="w-full lg:w-[45%] border-b lg:border-b-0 lg:border-l border-white/10 p-4 sm:p-6">
 
-            {aiLoading && (
-              <p className="text-xs text-indigo-400 mb-3 flex gap-1">
-                <Sparkles size={14} /> AI analyzing image…
-              </p>
-            )}
+          <h2 className="text-xs uppercase text-gray-400 mb-4">
+            Product Media
+          </h2>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              {["image1", "image2", "image3", "image4"].map((img) => (
-                <div
-                  key={img}
-                  className="h-32 sm:h-40 border border-dashed border-white/20 rounded-lg flex items-center justify-center relative"
+          {aiLoading && (
+            <p className="text-xs text-indigo-400 flex gap-1 mb-3">
+              <Sparkles size={14} /> AI analyzing image…
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            {["image1", "image2", "image3", "image4"].map((img) => (
+              <div
+                key={img}
+                className="h-32 sm:h-40 border border-dashed border-white/20 rounded-lg flex items-center justify-center relative"
+              >
+                {previews[img] ? (
+                  <>
+                    <img
+                      src={previews[img]}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+
+                    <button
+                      onClick={() => removeImage(img)}
+                      className="absolute top-2 right-2 bg-black/70 p-1 rounded-full"
+                    >
+                      <X size={14} />
+                    </button>
+                  </>
+                ) : (
+                  <label className="text-xs text-gray-400 text-center cursor-pointer">
+                    <Upload className="mx-auto mb-1" />
+                    Upload
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e) =>
+                        handleImage(img, e.target.files[0])
+                      }
+                    />
+                  </label>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="w-full lg:w-[55%] p-4 sm:p-6 lg:p-8 space-y-6">
+
+          <EditorInput
+            label="Product name"
+            value={form.name}
+            onChange={(v) => setForm({ ...form, name: v })}
+            big
+          />
+
+          <EditorTextarea
+            label="Description"
+            value={form.description}
+            onChange={(v) => setForm({ ...form, description: v })}
+          />
+
+          <EditorInput
+            label="Price"
+            value={form.price}
+            onChange={(v) => setForm({ ...form, price: v })}
+          />
+
+          <div>
+            <label className="text-xs text-gray-400">Sizes</label>
+
+            <div className="flex flex-wrap gap-2 mt-2">
+              {["S", "M", "L", "XL", "XXL"].map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => toggleSize(size)}
+                  className={`px-3 py-1 rounded border text-sm ${
+                    form.sizes.includes(size)
+                      ? "bg-indigo-600 border-indigo-600"
+                      : "border-white/20"
+                  }`}
                 >
-                  {previews[img] ? (
-                    <>
-                      <img
-                        src={previews[img]}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={() => removeImage(img)}
-                        className="absolute top-2 right-2 bg-black/60 rounded-full p-1"
-                      >
-                        <X size={14} />
-                      </button>
-                    </>
-                  ) : (
-                    <label className="text-xs text-gray-400 cursor-pointer text-center">
-                      <Upload className="mx-auto mb-1" />
-                      Upload
-                      <input
-                        type="file"
-                        hidden
-                        onChange={(e) =>
-                          handleImage(img, e.target.files[0])
-                        }
-                      />
-                    </label>
-                  )}
-                </div>
+                  {size}
+                </button>
               ))}
             </div>
           </div>
 
-          {/* DETAILS */}
-          <div className="order-2 lg:order-1 w-full lg:w-[55%] p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <EditorInput
-              label="Product name"
-              value={form.name}
-              onChange={(v) => setForm({ ...form, name: v })}
-              big
+              label="Category"
+              value={form.category}
+              onChange={(v) => setForm({ ...form, category: v })}
             />
 
-            <EditorTextarea
-              label="Description"
-              value={form.description}
-              onChange={(v) =>
-                setForm({ ...form, description: v })
-              }
+            <EditorInput
+              label="Sub Category"
+              value={form.subCategory}
+              onChange={(v) => setForm({ ...form, subCategory: v })}
             />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <EditorInput
-                label="Price"
-                value={form.price}
-                onChange={(v) => setForm({ ...form, price: v })}
-              />
-              <EditorInput
-                label="Sizes (S,M,L)"
-                value={form.sizes}
-                onChange={(v) => setForm({ ...form, sizes: v })}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <EditorInput
-                label="Category"
-                value={form.category}
-                onChange={(v) =>
-                  setForm({ ...form, category: v })
-                }
-              />
-              <EditorInput
-                label="Sub category"
-                value={form.subCategory}
-                onChange={(v) =>
-                  setForm({ ...form, subCategory: v })
-                }
-              />
-            </div>
-
-            {message && (
-              <p className="text-sm text-indigo-400">{message}</p>
-            )}
           </div>
+
         </div>
       </div>
 
-      {/* ================= MOBILE DASHBOARD FAB ================= */}
       <button
         onClick={() => navigate("/admin/dashboard")}
-        className="
-          fixed md:hidden
-          bottom-5 right-5
-          z-50
-          bg-indigo-600 hover:bg-indigo-700
-          text-white
-          px-4 py-3
-          rounded-full
-          shadow-2xl
-          text-sm font-semibold
-        "
+        className="fixed md:hidden bottom-5 right-5 bg-indigo-600 hover:bg-indigo-700 px-4 py-3 rounded-full shadow-lg text-sm"
       >
         Dashboard
       </button>
@@ -254,11 +281,10 @@ const AddProduct = () => {
   );
 };
 
-/* ================= SMALL EDITOR COMPONENTS ================= */
-
 const EditorInput = ({ label, value, onChange, big }) => (
   <div>
     <label className="text-xs text-gray-400">{label}</label>
+
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -273,12 +299,13 @@ const EditorInput = ({ label, value, onChange, big }) => (
 const EditorTextarea = ({ label, value, onChange }) => (
   <div>
     <label className="text-xs text-gray-400">{label}</label>
+
     <textarea
       rows={5}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className="w-full bg-transparent border-b border-white/20 outline-none py-2 text-sm resize-none"
-      placeholder="Write product story…"
+      placeholder="Write product description…"
     />
   </div>
 );

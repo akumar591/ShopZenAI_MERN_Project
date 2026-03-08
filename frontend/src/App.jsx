@@ -34,74 +34,95 @@ const App = () => {
       <CartProvider>
         <OrderProvider>
 
-          <Navbar />
+          <Routes>
 
-          <div className="pt-16 min-h-screen">
-            <Routes>
+            {/* ================= USER SITE ================= */}
+            <Route
+              path="/*"
+              element={
+                <>
+                  <Navbar />
 
-              {/* PUBLIC */}
-              <Route path="/" element={<Home />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/:id" element={<ProductDetails />} />
+                  <div className="pt-16 min-h-screen">
+                    <Routes>
 
-              {/* USER */}
-              <Route
-                path="/cart"
-                element={
-                  <UserProtectedRoute>
-                    <Cart />
-                  </UserProtectedRoute>
-                }
-              />
+                      {/* PUBLIC */}
+                      <Route path="/" element={<Home />} />
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/products" element={<Products />} />
+                      <Route
+                        path="/products/:id"
+                        element={<ProductDetails />}
+                      />
 
-              <Route
-                path="/checkout"
-                element={
-                  <UserProtectedRoute>
-                    <Checkout />
-                  </UserProtectedRoute>
-                }
-              />
+                      {/* USER */}
+                      <Route
+                        path="/cart"
+                        element={
+                          <UserProtectedRoute>
+                            <Cart />
+                          </UserProtectedRoute>
+                        }
+                      />
 
-              <Route
-                path="/orders"
-                element={
-                  <UserProtectedRoute>
-                    <Orders />
-                  </UserProtectedRoute>
-                }
-              />
+                      <Route
+                        path="/checkout"
+                        element={
+                          <UserProtectedRoute>
+                            <Checkout />
+                          </UserProtectedRoute>
+                        }
+                      />
 
-              <Route
-                path="/profile"
-                element={
-                  <UserProtectedRoute>
-                    <Profile />
-                  </UserProtectedRoute>
-                }
-              />
+                      <Route
+                        path="/orders"
+                        element={
+                          <UserProtectedRoute>
+                            <Orders />
+                          </UserProtectedRoute>
+                        }
+                      />
 
-              {/* 👑 ADMIN (NESTED ROUTES) */}
-              <Route
-                path="/admin"
-                element={
-                  <AdminProtectedRoute>
-                    <AdminLayout />
-                  </AdminProtectedRoute>
-                }
-              >
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="add-product" element={<AddProduct />} />
-                <Route path="products" element={<ProductList />} />
-                <Route path="orders" element={<AdminOrders />} />
-              </Route>
+                      <Route
+                        path="/profile"
+                        element={
+                          <UserProtectedRoute>
+                            <Profile />
+                          </UserProtectedRoute>
+                        }
+                      />
 
-            </Routes>
-          </div>
+                    </Routes>
+                  </div>
 
-          <Footer />
+                  <Footer />
+                </>
+              }
+            />
+
+            {/* ================= ADMIN PANEL ================= */}
+            <Route
+              path="/admin/*"
+              element={
+                <>
+                  <Navbar />
+
+                  <div className="pt-16 min-h-screen">
+                    <AdminProtectedRoute>
+                      <AdminLayout />
+                    </AdminProtectedRoute>
+                  </div>
+                </>
+              }
+            >
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="add-product" element={<AddProduct />} />
+              <Route path="products" element={<ProductList />} />
+              <Route path="orders" element={<AdminOrders />} />
+            </Route>
+
+          </Routes>
 
         </OrderProvider>
       </CartProvider>

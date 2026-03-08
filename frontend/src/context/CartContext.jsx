@@ -34,7 +34,7 @@ export const CartProvider = ({ children }) => {
       setLoading(true);
 
       const res = await axios.get(
-        "http://localhost:4000/api/cart/get",
+        "http://localhost:5000/api/cart/get",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -82,7 +82,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       await axios.post(
-        "http://localhost:4000/api/cart/add",
+        "http://localhost:5000/api/cart/add",
         {
           itemId: productId,
           size,
@@ -107,7 +107,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       await axios.post(
-        "http://localhost:4000/api/cart/update",
+        "http://localhost:5000/api/cart/update",
         { itemId: productId, size, quantity },
         {
           headers: {
@@ -126,7 +126,7 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (productId, size) => {
     try {
       await axios.post(
-        "http://localhost:4000/api/cart/update",
+        "http://localhost:5000/api/cart/update",
         { itemId: productId, size, quantity: 0 },
         {
           headers: {

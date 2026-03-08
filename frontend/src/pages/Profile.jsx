@@ -39,7 +39,7 @@ const Profile = () => {
       try {
         // 👤 PROFILE
         const profileRes = await axios.get(
-          "http://localhost:4000/api/user/profile",
+          "http://localhost:5000/api/user/profile",
           {
             headers: { Authorization: `Bearer ${token}` },
           }

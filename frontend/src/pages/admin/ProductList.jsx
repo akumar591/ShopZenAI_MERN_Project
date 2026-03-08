@@ -15,7 +15,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:4000/api/product/listproduct"
+        "http://localhost:5000/api/product/listproduct"
       );
 
       if (res.data.success) {
@@ -34,7 +34,7 @@ const ProductList = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/product/remove",
+        "http://localhost:5000/api/product/remove",
         { id },
         {
           headers: {

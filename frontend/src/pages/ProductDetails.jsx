@@ -19,7 +19,7 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         const res = await axios.post(
-          "http://localhost:4000/api/product/single",
+          "http://localhost:5000/api/product/single",
           { productId: id }
         );
 

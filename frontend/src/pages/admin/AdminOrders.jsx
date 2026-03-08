@@ -15,7 +15,7 @@ const AdminOrders = () => {
   const fetchOrders = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:4000/api/order/list",
+        "http://localhost:5000/api/order/list",
         {},
         {
           headers: {
@@ -36,7 +36,7 @@ const AdminOrders = () => {
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:4000/api/product/listproduct"
+        "http://localhost:5000/api/product/listproduct"
       );
 
       if (res.data.success) {
@@ -55,7 +55,7 @@ const AdminOrders = () => {
   const updateStatus = async (orderId, status) => {
     try {
       await axios.post(
-        "http://localhost:4000/api/order/status",
+        "http://localhost:5000/api/order/status",
         { orderId, status },
         {
           headers: {
