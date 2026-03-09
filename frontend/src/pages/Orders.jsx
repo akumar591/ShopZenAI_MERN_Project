@@ -36,7 +36,7 @@ const Orders = () => {
 
         // 1️⃣ Fetch orders
         const res = await axios.post(
-          "http://localhost:4000/api/order/userorders",
+          "https://shopzenai-mern-project.onrender.com/api/order/userorders",
           { userId },
           {
             headers: {
@@ -60,7 +60,7 @@ const Orders = () => {
           // 3️⃣ Fetch product details
           if (ids.size > 0) {
             const prodRes = await axios.post(
-              "http://localhost:4000/api/product/cart-products",
+              "https://shopzenai-mern-project.onrender.com/api/product/cart-products",
               { ids: Array.from(ids) }
             );
 
@@ -92,7 +92,7 @@ const Orders = () => {
       if (!window.confirm("Are you sure you want to cancel this order?")) return;
 
       const res = await axios.post(
-        "http://localhost:4000/api/order/cancel",
+        "https://shopzenai-mern-project.onrender.com/api/order/cancel",
         { orderId, userId },
         {
           headers: {
@@ -134,7 +134,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="pt-16 bg-gray-100 min-h-screen">
+    <div className="pt-6 bg-gray-100 min-h-screen">
       <div className="max-w-6xl mx-auto px-6 py-10">
         <h1 className="text-3xl font-bold mb-8">My Orders</h1>
 

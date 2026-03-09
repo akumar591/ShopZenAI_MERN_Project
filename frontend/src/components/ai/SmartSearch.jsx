@@ -6,54 +6,67 @@ const SmartSearch = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log("AI Search Query:", query);
+    console.log("AI Search:", query);
   };
 
   return (
-    <form
-      onSubmit={handleSearch}
-      className="
-        bg-white shadow-lg rounded-xl
-        px-4 py-4
-        flex flex-col gap-3
-        sm:flex-row sm:items-center
-      "
-    >
-      {/* Search Icon */}
-      <div className="flex items-center gap-2 text-indigo-600">
-        <Search />
+    <div className="w-full border-b shadow-md">
+
+      <div className="max-w-7xl mx-auto px-4 py-2">
+
+        <form
+          onSubmit={handleSearch}
+          className="
+            flex items-center
+            bg-gray-100
+            rounded-full
+            px-3 py-1.5
+            gap-2
+            shadow-md shadow-black/50
+          "
+        >
+          {/* Icon */}
+          <Search size={16} className="text-gray-500" />
+
+          {/* Input */}
+          <input
+            type="text"
+            placeholder='Try: "men shoes under 3000"'
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="
+              flex-1
+              bg-transparent
+              outline-none
+              text-sm
+              sm:text-base
+              placeholder:text-[11px]
+              sm:placeholder:text-sm
+              placeholder-gray-400
+            "
+          />
+
+          {/* Button */}
+          <button
+            type="submit"
+            className="
+              bg-indigo-600
+              text-white
+              text-xs sm:text-sm
+              px-3 py-1
+              rounded-full
+              hover:bg-indigo-700
+              transition
+            "
+          >
+            Search
+          </button>
+
+        </form>
+
       </div>
 
-      {/* Input */}
-      <input
-        type="text"
-        placeholder='Try: "men shoes under 3000"'
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="
-          flex-1
-          outline-none
-          text-gray-700
-          placeholder-gray-400
-          text-sm sm:text-base
-        "
-      />
-
-      {/* Button */}
-      <button
-        type="submit"
-        className="
-          w-full sm:w-auto
-          px-4 py-2
-          bg-indigo-600 text-white
-          rounded-lg
-          hover:bg-indigo-700
-          transition
-        "
-      >
-        Search
-      </button>
-    </form>
+    </div>
   );
 };
 

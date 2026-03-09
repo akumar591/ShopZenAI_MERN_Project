@@ -22,12 +22,39 @@ const CategorySlider = () => {
     <section className="bg-gray-100 py-6">
       <div className="max-w-7xl mx-auto px-4">
 
+        {/* MOBILE GRID */}
+        <div className="grid grid-cols-3 gap-3 md:hidden">
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              to={cat.link}
+              className="
+                flex flex-col items-center gap-1
+                bg-white rounded-xl
+                py-4
+                shadow
+                hover:shadow-md
+                transition
+                group
+              "
+            >
+              <div className="text-indigo-600 group-hover:scale-110 transition">
+                {cat.icon}
+              </div>
+
+              <p className="text-xs font-medium text-gray-700 text-center">
+                {cat.name}
+              </p>
+            </Link>
+          ))}
+        </div>
+
+        {/* DESKTOP SLIDER */}
         <div
           className="
-            flex gap-4
-            overflow-x-auto scrollbar-hide
-            pb-2
-            md:justify-center md:overflow-x-visible
+            hidden md:flex
+            gap-4
+            justify-center
           "
         >
           {categories.map((cat) => (
@@ -35,7 +62,7 @@ const CategorySlider = () => {
               key={cat.id}
               to={cat.link}
               className="
-                min-w-[96px] sm:min-w-[110px]
+                min-w-[110px]
                 flex flex-col items-center gap-1.5
                 bg-white rounded-xl
                 px-3 py-4
@@ -49,7 +76,7 @@ const CategorySlider = () => {
                 {cat.icon}
               </div>
 
-              <p className="text-xs sm:text-sm font-medium text-gray-700 text-center">
+              <p className="text-sm font-medium text-gray-700 text-center">
                 {cat.name}
               </p>
             </Link>

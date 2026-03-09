@@ -56,7 +56,7 @@ const Checkout = () => {
         if (!ids.length) return;
 
         const res = await axios.post(
-          "http://localhost:4000/api/product/cart-products",
+          "https://shopzenai-mern-project.onrender.com/api/product/cart-products",
           { ids }
         );
 
@@ -129,7 +129,7 @@ const Checkout = () => {
       }
 
       const res = await axios.post(
-        "http://localhost:4000/api/order/place",
+        "https://shopzenai-mern-project.onrender.com/api/order/place",
         {
           userId,
           items: cartItems,
@@ -159,7 +159,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-100">
+    <div className="pt-6 min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-6 py-10 space-y-8">
 
         {/* ================= TOP: PRODUCTS ================= */}

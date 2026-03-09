@@ -15,7 +15,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/product/listproduct"
+        "https://shopzenai-mern-project.onrender.com/api/product/listproduct"
       );
 
       if (res.data.success) {
@@ -34,7 +34,7 @@ const ProductList = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/product/remove",
+        "https://shopzenai-mern-project.onrender.com/api/product/remove",
         { id },
         {
           headers: {

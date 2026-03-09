@@ -5,22 +5,20 @@ import RecommendationSlider from "../components/ai/RecommendationSlider";
 
 const Home = () => {
   return (
-    <div className="pt-8 bg-gray-100">
-      
-      <HeroSlider />
+    <div className="pt-0 bg-gray-100">
 
       {/* Smart Search */}
-      <div className="relative z-10 -mt-12">
-        <div className="max-w-3xl mx-auto px-4">
-          <SmartSearch />
-        </div>
-      </div>
+      <SmartSearch />
+
+      {/* Hero Slider */}
+      <HeroSlider />
 
       {/* Category Slider */}
       <CategorySlider />
 
-      {/* Recommendations */}
+      {/* AI Recommendations */}
       <RecommendationSlider />
+
     </div>
   );
 };

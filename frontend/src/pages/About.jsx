@@ -25,7 +25,7 @@ const features = [
 
 const About = () => {
   return (
-    <div className="pt-16 bg-gray-100 min-h-screen">
+    <div className="bg-gray-100 min-h-screen">
 
       {/* HERO SECTION */}
       <section className="relative h-[320px] md:h-[420px]">

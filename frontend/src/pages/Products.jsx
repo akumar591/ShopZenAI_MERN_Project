@@ -29,7 +29,7 @@ const Products = () => {
       try{
 
         const res = await axios.get(
-          "http://localhost:5000/api/product/listproduct"
+          "https://shopzenai-mern-project.onrender.com/api/product/listproduct"
         );
 
         if(res.data.success){

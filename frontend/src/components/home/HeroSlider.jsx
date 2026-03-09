@@ -9,7 +9,7 @@ const slides = [
     highlight: "Powered by AI",
     desc: "Personalized recommendations, smart search and better deals.",
     image:
-      "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=1600&q=80&auto=format&fit=crop",
+       "https://images.unsplash.com/photo-1555529771-7888783a18d3?q=80&w=1600&auto=format&fit=crop",
   },
   {
     id: 2,

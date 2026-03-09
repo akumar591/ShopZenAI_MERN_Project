@@ -15,7 +15,7 @@ const AdminOrders = () => {
   const fetchOrders = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/order/list",
+        "https://shopzenai-mern-project.onrender.com/api/order/list",
         {},
         {
           headers: {
@@ -36,7 +36,7 @@ const AdminOrders = () => {
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/product/listproduct"
+        "https://shopzenai-mern-project.onrender.com/api/product/listproduct"
       );
 
       if (res.data.success) {
@@ -55,7 +55,7 @@ const AdminOrders = () => {
   const updateStatus = async (orderId, status) => {
     try {
       await axios.post(
-        "http://localhost:5000/api/order/status",
+        "https://shopzenai-mern-project.onrender.com/api/order/status",
         { orderId, status },
         {
           headers: {

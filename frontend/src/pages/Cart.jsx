@@ -17,7 +17,7 @@ const Cart = () => {
         if (ids.length === 0) return;
 
         const res = await axios.post(
-          "http://localhost:4000/api/product/cart-products",
+          "https://shopzenai-mern-project.onrender.com/api/product/cart-products",
           { ids }
         );
 
@@ -45,7 +45,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="pt-16 bg-gray-100 min-h-screen">
+    <div className="pt-6 bg-gray-100 min-h-screen">
       <div className="max-w-6xl mx-auto px-6 py-10">
 
         <h1 className="text-3xl font-bold mb-8">Your Cart</h1>

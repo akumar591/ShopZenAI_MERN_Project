@@ -50,7 +50,7 @@ const AddProduct = () => {
         fd.append("image", file);
 
         const res = await axios.post(
-          "http://localhost:5000/api/ai/scan-image",
+          "https://shopzenai-mern-project.onrender.com/api/ai/scan-image",
           fd
         );
 
@@ -108,7 +108,7 @@ const AddProduct = () => {
       Object.keys(images).forEach((k) => data.append(k, images[k]));
 
       const res = await axios.post(
-        "http://localhost:5000/api/product/add",
+        "https://shopzenai-mern-project.onrender.com/api/product/add",
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );
