@@ -1,26 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from "./AuthContext"; // 🔥 important
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
+
+  const { token } = useAuth(); // ✅ direct auth se token
+
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  /* ================= TOKEN (FULLY REACTIVE FIX) ================= */
-  const [token, setToken] = useState(
-    localStorage.getItem("token")
-  );
-
-  // 🔥 handles login/logout in SAME TAB also
-  const syncToken = () => {
-    setToken(localStorage.getItem("token"));
-  };
-
-  useEffect(() => {
-    window.addEventListener("storage", syncToken);
-    return () => window.removeEventListener("storage", syncToken);
-  }, []);
 
   /* ================= FETCH CART ================= */
   const fetchCart = async () => {
@@ -68,7 +57,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  /* ================= CLEAR CART (NEW ✅) ================= */
+  /* ================= CLEAR CART ================= */
   const clearCart = () => {
     setCartItems([]);
   };
@@ -144,7 +133,7 @@ export const CartProvider = ({ children }) => {
   /* ================= AUTO FETCH ================= */
   useEffect(() => {
     fetchCart();
-  }, [token]);
+  }, [token]); // 🔥 token change hote hi auto fetch
 
   return (
     <CartContext.Provider
@@ -154,9 +143,8 @@ export const CartProvider = ({ children }) => {
         addToCart,
         updateCart,
         removeFromCart,
-        fetchCart,  // ✅ exported
-        clearCart,  // ✅ NEW
-        syncToken,  // optional
+        fetchCart,
+        clearCart,
       }}
     >
       {children}
