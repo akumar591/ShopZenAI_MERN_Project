@@ -1,60 +1,102 @@
 import { useCart } from "../../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
 
 const ProductCard = ({ product }) => {
-
   const { addToCart } = useCart();
   const navigate = useNavigate();
 
   const defaultSize = product.sizes?.[0] || "M";
 
-  return (
+  const handleAddToCart = () => {
+    addToCart(product._id, defaultSize, 1);
 
-    <div className="p-3 sm:p-4 rounded-md bg-white/60 backdrop-blur-md border border-gray-200 flex flex-col h-full hover:shadow-sm transition">
+    // 🔥 toast (TOP POSITION ONLY CHANGE)
+    const toast = document.createElement("div");
+    toast.innerText = "Added to cart 🛒";
+    toast.className =
+      "fixed top-5 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 rounded-md shadow z-50";
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 1500);
+  };
+
+  return (
+    <div className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-sm transition">
 
       {/* IMAGE */}
       <div
         onClick={() => navigate(`/products/${product._id}`)}
-        className="cursor-pointer overflow-hidden rounded-md"
+        className="relative cursor-pointer"
       >
         <img
           src={product.image?.[0]}
           alt={product.name}
-          className="w-full h-40 sm:h-52 md:h-56 object-cover transition duration-300 hover:scale-105"
+          className="w-full h-[170px] sm:h-[200px] object-cover rounded-t-lg"
         />
+
+        {/* AD */}
+        <span className="absolute top-2 left-2 text-[10px] bg-gray-200 px-2 py-0.5 rounded">
+          AD
+        </span>
+
+        {/* CART ICON */}
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToCart();
+          }}
+          className="absolute top-2 right-2 bg-white p-1.5 rounded-full shadow"
+        >
+          <ShoppingCart size={14} />
+        </div>
+
+        {/* RATING */}
+        <div className="absolute bottom-2 left-2 bg-white text-[10px] px-2 py-0.5 rounded shadow flex items-center gap-1">
+          ⭐ {product.rating || "4.2"}
+        </div>
       </div>
 
       {/* CONTENT */}
-      <div className="flex flex-col flex-grow">
+      <div className="px-2.5 py-2 space-y-1">
 
-        {/* NAME */}
+        <p className="text-[10px] text-purple-600 font-medium">
+          trendy
+        </p>
+
         <h3
           onClick={() => navigate(`/products/${product._id}`)}
-          className="mt-3 text-sm sm:text-base font-medium cursor-pointer line-clamp-1"
+          className="text-sm font-medium line-clamp-1 cursor-pointer leading-tight"
         >
           {product.name}
         </h3>
 
-        {/* PRICE */}
-        <p className="mt-1 text-sm sm:text-base font-medium">
-          ₹{product.price}
+        <p className="text-[11px] text-gray-500 line-clamp-1 leading-tight">
+          {product.category}
         </p>
 
-        {/* BUTTON */}
-        <div className="mt-auto pt-3">
-          <button
-            onClick={() => addToCart(product._id, defaultSize, 1)}
-            className="w-full bg-blue-600 text-white py-2 text-xs sm:text-sm rounded-md 
-            hover:bg-blue-700 hover:shadow-md active:scale-95 transition-all duration-200"
-          >
-            Add to Cart
-          </button>
+        {/* PRICE */}
+        <div className="flex items-center gap-1 text-sm">
+          <span className="text-green-600 font-semibold">
+            ₹{product.price}
+          </span>
+
+          <span className="text-gray-400 line-through text-[10px]">
+            ₹{product.price + 500}
+          </span>
+
+          <span className="text-green-600 text-[10px]">
+            50% off
+          </span>
         </div>
 
+        <p className="text-[10px] text-gray-500">
+          Delivery Tomorrow
+        </p>
+
       </div>
-
     </div>
-
   );
 };
 

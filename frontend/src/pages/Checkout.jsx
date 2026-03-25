@@ -18,11 +18,10 @@ const getUserIdFromToken = () => {
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cartItems, clearCart } = useCart(); // ✅ FIX
+  const { cartItems, clearCart } = useCart();
 
   const [productMap, setProductMap] = useState({});
   const [loading, setLoading] = useState(false);
-  const [paymentMethod] = useState("COD");
 
   const [address, setAddress] = useState({
     name: "",
@@ -35,40 +34,40 @@ const Checkout = () => {
     addressType: "Home",
   });
 
-  /* ================= AUTH + CART CHECK ================= */
+  /* ================= TOAST ================= */
+  const showToast = (msg) => {
+    const toast = document.createElement("div");
+    toast.innerText = msg;
+
+    toast.className =
+      "fixed top-5 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 rounded-md shadow z-50";
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  };
+
+  /* ================= AUTH CHECK ================= */
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/auth");
-      return;
-    }
-
-    if (cartItems.length === 0) {
-      navigate("/cart");
-    }
+    if (!token) navigate("/auth");
+    if (cartItems.length === 0) navigate("/cart");
   }, [cartItems, navigate]);
 
-  /* ================= FETCH PRODUCT DETAILS ================= */
+  /* ================= FETCH PRODUCTS ================= */
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const ids = [...new Set(cartItems.map((i) => i.productId))];
-        if (!ids.length) return;
+      const ids = [...new Set(cartItems.map((i) => i.productId))];
+      if (!ids.length) return;
 
-        const res = await axios.post(
-          "https://shopzenai-mern-project.onrender.com/api/product/cart-products",
-          { ids }
-        );
+      const res = await axios.post(
+        "https://shopzenai-mern-project.onrender.com/api/product/cart-products",
+        { ids }
+      );
 
-        if (res.data.success) {
-          const map = {};
-          res.data.products.forEach((p) => {
-            map[p._id] = p;
-          });
-          setProductMap(map);
-        }
-      } catch (err) {
-        console.error("Failed to load products");
+      if (res.data.success) {
+        const map = {};
+        res.data.products.forEach((p) => (map[p._id] = p));
+        setProductMap(map);
       }
     };
 
@@ -81,52 +80,15 @@ const Checkout = () => {
     return sum + price * item.qty;
   }, 0);
 
-  /* ================= ADDRESS VALIDATION ================= */
-  const isAddressValid = () => {
-    const requiredFields = [
-      "name",
-      "phone",
-      "house",
-      "area",
-      "city",
-      "state",
-      "pincode",
-    ];
-
-    for (let field of requiredFields) {
-      if (!address[field] || address[field].trim() === "") {
-        alert(`Please fill ${field}`);
-        return false;
-      }
-    }
-
-    if (address.phone.length !== 10) {
-      alert("Please enter a valid 10-digit phone number");
-      return false;
-    }
-
-    if (address.pincode.length !== 6) {
-      alert("Please enter a valid 6-digit pincode");
-      return false;
-    }
-
-    return true;
-  };
-
   /* ================= PLACE ORDER ================= */
   const placeOrder = async () => {
-    try {
-      if (!isAddressValid()) return;
+    if (loading) return;
 
+    try {
       setLoading(true);
 
       const token = localStorage.getItem("token");
       const userId = getUserIdFromToken();
-
-      if (!userId) {
-        alert("User not authenticated");
-        return;
-      }
 
       const res = await axios.post(
         "https://shopzenai-mern-project.onrender.com/api/order/place",
@@ -136,23 +98,24 @@ const Checkout = () => {
           amount: subtotal,
           address,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {
-        clearCart();                 // ✅ CART CLEAR
-        alert("Order Placed Successfully 🎉");
-        navigate("/orders");         // ✅ REDIRECT
+        clearCart();
+
+        showToast("Order placed successfully 🎉");
+
+        setTimeout(() => {
+          navigate("/orders");
+        }, 800);
       } else {
-        alert(res.data.message || "Order failed");
+        showToast("Failed to place order");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong");
+
+    } catch (err) {
+      console.error(err);
+      showToast("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -160,78 +123,102 @@ const Checkout = () => {
 
   return (
     <div className="pt-6 min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-6 py-10 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 space-y-6">
 
-        {/* ================= TOP: PRODUCTS ================= */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-xl font-bold mb-4">Order Items</h2>
+        {/* ORDER ITEMS */}
+        <div className="bg-white rounded-md">
 
-          {cartItems.map((item) => {
+          {cartItems.map((item, index) => {
             const product = productMap[item.productId];
+
             return (
-              <div
-                key={`${item.productId}-${item.size}`}
-                className="flex justify-between items-center border-b py-4"
-              >
-                <div className="flex gap-4 items-center">
-                  <img
-                    src={product?.image?.[0]}
-                    alt={product?.name}
-                    className="w-20 h-20 object-cover rounded"
-                  />
+              <div key={index} className="p-4 border-b flex gap-4">
+
+                <img
+                  src={product?.image?.[0]}
+                  className="w-20 h-20 object-cover rounded"
+                />
+
+                <div className="flex-1 flex flex-col justify-between">
 
                   <div>
-                    <p className="font-semibold">{product?.name}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm font-medium">
+                      {product?.name}
+                    </p>
+
+                    <p className="text-xs text-gray-500">
                       Size: {item.size} | Qty: {item.qty}
                     </p>
                   </div>
+
+                  <p className="font-semibold text-sm mt-2">
+                    ₹{(product?.price || 0) * item.qty}
+                  </p>
+
                 </div>
 
-                <p className="font-semibold">
-                  ₹{(product?.price || 0) * item.qty}
-                </p>
               </div>
             );
           })}
 
-          <div className="flex justify-between font-bold text-lg mt-4">
+          <div className="p-4 flex justify-between font-semibold">
             <span>Subtotal</span>
             <span>₹{subtotal}</span>
           </div>
+
         </div>
 
-        {/* ================= BOTTOM ================= */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        {/* MAIN SECTION */}
+        <div className="grid lg:grid-cols-3 gap-6">
 
           {/* ADDRESS */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-bold mb-4">Delivery Address</h2>
+          <div className="lg:col-span-2 bg-white p-5 rounded-md">
+
+            <h2 className="text-lg font-semibold mb-4">
+              Delivery Address
+            </h2>
 
             <div className="grid md:grid-cols-2 gap-4">
+
               {["name","phone","house","area","city","state","pincode"].map((f) => (
                 <input
                   key={f}
                   placeholder={f.toUpperCase()}
-                  className="input"
-                  onChange={(e) =>
-                    setAddress({ ...address, [f]: e.target.value })
-                  }
+                  className="input-clean"
+
+                  type={f === "phone" || f === "pincode" ? "tel" : "text"}
+                  inputMode={f === "phone" || f === "pincode" ? "numeric" : "text"}
+                  maxLength={f === "phone" ? 10 : f === "pincode" ? 6 : undefined}
+
+                  onChange={(e) => {
+                    let value = e.target.value;
+
+                    if (f === "phone" || f === "pincode") {
+                      value = value.replace(/[^0-9]/g, "");
+                    }
+
+                    setAddress({ ...address, [f]: value });
+                  }}
                 />
               ))}
+
             </div>
+
           </div>
 
           {/* SUMMARY */}
-          <div className="bg-white p-6 rounded-xl shadow space-y-6">
-            <h2 className="text-xl font-bold">Payment & Summary</h2>
+          <div className="bg-white p-5 rounded-md space-y-4 h-fit sticky top-20">
 
-            <p className="flex justify-between font-semibold">
+            <h2 className="text-sm font-semibold">
+              PRICE DETAILS
+            </h2>
+
+            <div className="flex justify-between text-sm">
               <span>Total</span>
               <span>₹{subtotal}</span>
-            </p>
+            </div>
 
-            <div className="payment active">
+            <div className="payment">
               <input type="radio" checked readOnly />
               Cash on Delivery
             </div>
@@ -239,29 +226,45 @@ const Checkout = () => {
             <button
               onClick={placeOrder}
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold"
+              className={`
+                w-full py-2.5 text-sm rounded-md transition
+                ${loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-indigo-600 text-white hover:bg-indigo-700"}
+              `}
             >
               {loading ? "Placing Order..." : "Place Order"}
             </button>
+
           </div>
+
         </div>
       </div>
 
+      {/* INPUT STYLE */}
       <style>{`
-        .input {
-          border: 1px solid #e5e7eb;
-          padding: 0.75rem;
-          border-radius: 0.5rem;
+        .input-clean {
+          border: none;
+          border-bottom: 1px solid #d1d5db;
+          padding: 8px 4px;
+          font-size: 14px;
+          outline: none;
+          background: transparent;
+          transition: 0.2s;
         }
+
+        .input-clean:focus {
+          border-bottom: 1px solid #6366f1;
+        }
+
         .payment {
-          border: 1px solid #e5e7eb;
-          padding: 0.75rem;
-          border-radius: 0.5rem;
           display: flex;
-          gap: 0.75rem;
+          gap: 8px;
+          font-size: 14px;
           align-items: center;
-          background: #eef2ff;
-          border-color: #6366f1;
+          padding: 8px;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
         }
       `}</style>
     </div>

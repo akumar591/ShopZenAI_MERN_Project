@@ -1,8 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-import ScrollToTop from "./components/ScrollToTop"; // 🔥 ADD THIS
+import ScrollToTop from "./components/ScrollToTop";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -29,105 +29,117 @@ import { AuthProvider } from "./context/AuthContext";
 import UserProtectedRoute from "./routes/UserProtectedRoute";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute";
 
+const AppContent = () => {
+  const location = useLocation();
+
+  // ✅ Footer hide logic
+  const hideFooter = location.pathname.startsWith("/products/");
+
+  return (
+    <>
+      {/* 🔥 GLOBAL SCROLL FIX */}
+      <ScrollToTop />
+
+      <Routes>
+
+        {/* ================= USER SITE ================= */}
+        <Route
+          path="/*"
+          element={
+            <>
+              <Navbar />
+
+              <div className="pt-16 min-h-screen">
+                <Routes>
+
+                  {/* PUBLIC */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route
+                    path="/products/:id"
+                    element={<ProductDetails />}
+                  />
+
+                  {/* USER */}
+                  <Route
+                    path="/cart"
+                    element={
+                      <UserProtectedRoute>
+                        <Cart />
+                      </UserProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/checkout"
+                    element={
+                      <UserProtectedRoute>
+                        <Checkout />
+                      </UserProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/orders"
+                    element={
+                      <UserProtectedRoute>
+                        <Orders />
+                      </UserProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/profile"
+                    element={
+                      <UserProtectedRoute>
+                        <Profile />
+                      </UserProtectedRoute>
+                    }
+                  />
+
+                </Routes>
+              </div>
+
+              {/* ✅ CONDITIONAL FOOTER */}
+              {!hideFooter && <Footer />}
+            </>
+          }
+        />
+
+        {/* ================= ADMIN PANEL ================= */}
+        <Route
+          path="/admin/*"
+          element={
+            <>
+              <Navbar />
+
+              <div className="pt-16 min-h-screen">
+                <AdminProtectedRoute>
+                  <AdminLayout />
+                </AdminProtectedRoute>
+              </div>
+            </>
+          }
+        >
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="add-product" element={<AddProduct />} />
+          <Route path="products" element={<ProductList />} />
+          <Route path="orders" element={<AdminOrders />} />
+        </Route>
+
+      </Routes>
+    </>
+  );
+};
+
 const App = () => {
   return (
     <AuthProvider>
       <CartProvider>
         <OrderProvider>
-
-          {/* 🔥 GLOBAL SCROLL FIX */}
-          <ScrollToTop />
-
-          <Routes>
-
-            {/* ================= USER SITE ================= */}
-            <Route
-              path="/*"
-              element={
-                <>
-                  <Navbar />
-
-                  <div className="pt-16 min-h-screen">
-                    <Routes>
-
-                      {/* PUBLIC */}
-                      <Route path="/" element={<Home />} />
-                      <Route path="/auth" element={<Auth />} />
-                      <Route path="/about" element={<About />} />
-                      <Route path="/products" element={<Products />} />
-                      <Route
-                        path="/products/:id"
-                        element={<ProductDetails />}
-                      />
-
-                      {/* USER */}
-                      <Route
-                        path="/cart"
-                        element={
-                          <UserProtectedRoute>
-                            <Cart />
-                          </UserProtectedRoute>
-                        }
-                      />
-
-                      <Route
-                        path="/checkout"
-                        element={
-                          <UserProtectedRoute>
-                            <Checkout />
-                          </UserProtectedRoute>
-                        }
-                      />
-
-                      <Route
-                        path="/orders"
-                        element={
-                          <UserProtectedRoute>
-                            <Orders />
-                          </UserProtectedRoute>
-                        }
-                      />
-
-                      <Route
-                        path="/profile"
-                        element={
-                          <UserProtectedRoute>
-                            <Profile />
-                          </UserProtectedRoute>
-                        }
-                      />
-
-                    </Routes>
-                  </div>
-
-                  <Footer />
-                </>
-              }
-            />
-
-            {/* ================= ADMIN PANEL ================= */}
-            <Route
-              path="/admin/*"
-              element={
-                <>
-                  <Navbar />
-
-                  <div className="pt-16 min-h-screen">
-                    <AdminProtectedRoute>
-                      <AdminLayout />
-                    </AdminProtectedRoute>
-                  </div>
-                </>
-              }
-            >
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="add-product" element={<AddProduct />} />
-              <Route path="products" element={<ProductList />} />
-              <Route path="orders" element={<AdminOrders />} />
-            </Route>
-
-          </Routes>
-
+          <AppContent />
         </OrderProvider>
       </CartProvider>
     </AuthProvider>

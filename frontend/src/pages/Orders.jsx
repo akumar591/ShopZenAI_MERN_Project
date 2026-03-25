@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-/* ================= USER ID FROM TOKEN ================= */
+/* ================= USER ID ================= */
 const getUserIdFromToken = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
@@ -22,7 +22,11 @@ const Orders = () => {
   const [productMap, setProductMap] = useState({});
   const [loading, setLoading] = useState(true);
 
-  /* ================= FETCH ORDERS ================= */
+  // 🔥 NEW STATES
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  /* ================= FETCH ================= */
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -34,30 +38,24 @@ const Orders = () => {
           return;
         }
 
-        // 1️⃣ Fetch orders
         const res = await axios.post(
           "https://shopzenai-mern-project.onrender.com/api/order/userorders",
           { userId },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (res.data.success) {
-          const ordersData = res.data.orders.reverse();
-          setOrders(ordersData);
+          const sorted = res.data.orders.sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+          );
 
-          // 2️⃣ Collect productIds
+          setOrders(sorted);
+
           const ids = new Set();
-          ordersData.forEach((order) => {
-            order.items.forEach((item) => {
-              ids.add(item.productId);
-            });
-          });
+          sorted.forEach((o) =>
+            o.items.forEach((i) => ids.add(i.productId))
+          );
 
-          // 3️⃣ Fetch product details
           if (ids.size > 0) {
             const prodRes = await axios.post(
               "https://shopzenai-mern-project.onrender.com/api/product/cart-products",
@@ -74,7 +72,7 @@ const Orders = () => {
           }
         }
       } catch (err) {
-        console.error("Orders fetch failed", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -83,36 +81,46 @@ const Orders = () => {
     fetchOrders();
   }, [navigate]);
 
-  /* ================= CANCEL ORDER ================= */
-  const cancelOrder = async (orderId) => {
+  /* ================= CANCEL ================= */
+  const confirmCancel = (orderId) => {
+    setSelectedOrder(orderId);
+    setShowConfirm(true);
+  };
+
+  const handleCancelOrder = async () => {
     try {
       const token = localStorage.getItem("token");
       const userId = getUserIdFromToken();
 
-      if (!window.confirm("Are you sure you want to cancel this order?")) return;
-
       const res = await axios.post(
         "https://shopzenai-mern-project.onrender.com/api/order/cancel",
-        { orderId, userId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { orderId: selectedOrder, userId },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {
-        alert("Order cancelled successfully");
         setOrders((prev) =>
           prev.map((o) =>
-            o._id === orderId ? { ...o, status: "Cancelled" } : o
+            o._id === selectedOrder ? { ...o, status: "Cancelled" } : o
           )
         );
-      } else {
-        alert(res.data.message);
+
+        // 🔥 toast
+        const toast = document.createElement("div");
+        toast.innerText = "Order cancelled successfully";
+
+        toast.className =
+          "fixed top-5 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 rounded-md shadow z-50";
+
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1500);
       }
-    } catch (error) {
-      alert("Failed to cancel order");
+
+      setShowConfirm(false);
+      setSelectedOrder(null);
+
+    } catch {
+      alert("Cancel failed");
     }
   };
 
@@ -125,104 +133,128 @@ const Orders = () => {
     );
   }
 
-  if (orders.length === 0) {
-    return (
-      <div className="pt-16 min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">No orders placed yet.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="pt-6 bg-gray-100 min-h-screen">
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold mb-8">My Orders</h1>
+    <div className="bg-gray-100 min-h-screen pt-6">
+      <div className="max-w-6xl mx-auto px-4 space-y-6">
 
-        <div className="space-y-8">
-          {orders.map((order) => (
-            <div
-              key={order._id}
-              className="bg-white p-6 rounded-xl shadow"
-            >
-              {/* HEADER */}
-              <div className="flex justify-between mb-4">
-                <div>
-                  <p className="font-semibold">
-                    Order ID: #{order._id.slice(-6)}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(order.date).toLocaleString()}
-                  </p>
+        <h1 className="text-2xl font-semibold">
+          My Orders ({orders.length})
+        </h1>
+
+        {orders.map((order) => (
+          <div key={order._id} className="bg-white rounded-md">
+
+            {/* HEADER */}
+            <div className="p-4 border-b">
+              <p className="text-sm font-medium">
+                Order #{order._id.slice(-6)}
+              </p>
+              <p className="text-xs text-gray-500">
+                {new Date(order.date).toLocaleString()}
+              </p>
+            </div>
+
+            {/* ITEMS */}
+            {order.items.map((item, idx) => {
+              const product = productMap[item.productId];
+
+              return (
+                <div key={idx} className="p-4 border-b flex gap-4">
+                  <img
+                    src={product?.image?.[0]}
+                    className="w-20 h-20 object-cover rounded"
+                  />
+
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">
+                      {product?.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Size: {item.size} | Qty: {item.qty}
+                    </p>
+                    <p className="font-semibold text-sm mt-2">
+                      ₹{(product?.price || 0) * item.qty}
+                    </p>
+                  </div>
                 </div>
+              );
+            })}
 
-                <span
-                  className={`font-semibold ${
-                    order.status === "Cancelled"
-                      ? "text-red-500"
-                      : "text-indigo-600"
-                  }`}
-                >
-                  {order.status}
-                </span>
-              </div>
+            {/* FOOTER */}
+            <div className="p-4 space-y-3">
 
-              {/* ITEMS */}
-              <div className="space-y-4">
-                {order.items.map((item, idx) => {
-                  const product = productMap[item.productId];
-
-                  return (
-                    <div
-                      key={idx}
-                      className="flex gap-4 items-center border-b pb-4"
-                    >
-                      <img
-                        src={product?.image?.[0]}
-                        alt={product?.name}
-                        className="w-20 h-20 object-cover rounded"
-                      />
-
-                      <div className="flex-1">
-                        <p className="font-semibold">
-                          {product?.name || "Product"}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Size: {item.size} × {item.qty}
-                        </p>
-                      </div>
-
-                      <p className="font-semibold">
-                        ₹{(product?.price || 0) * item.qty}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* FOOTER */}
-              <div className="flex justify-between font-bold mt-4">
+              <div className="flex justify-between font-semibold text-sm">
                 <span>Total</span>
                 <span>₹{order.amount}</span>
               </div>
 
-              <p className="text-sm text-gray-500 mt-1">
-                Payment Method: {order.paymentMethod}
-              </p>
+              <div className="flex items-center justify-between">
 
-              {/* CANCEL BUTTON */}
-              {order.payment === false &&
-                order.status !== "Cancelled" && (
-                  <button
-                    onClick={() => cancelOrder(order._id)}
-                    className="mt-4 px-4 py-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 transition"
+                <p className="text-sm">
+                  <span className="text-gray-500">Status: </span>
+                  <span
+                    className={`font-medium ${
+                      order.status === "Cancelled"
+                        ? "text-red-500"
+                        : "text-indigo-600"
+                    }`}
                   >
-                    Cancel Order
-                  </button>
-                )}
+                    {order.status}
+                  </span>
+                </p>
+
+                {order.payment === false &&
+                  order.status !== "Cancelled" && (
+                    <button
+                      onClick={() => confirmCancel(order._id)}
+                      className="text-red-500 text-xs"
+                    >
+                      Cancel Order
+                    </button>
+                  )}
+
+              </div>
+
             </div>
-          ))}
-        </div>
+
+          </div>
+        ))}
+
       </div>
+
+      {/* 🔥 CONFIRM MODAL */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+          <div className="bg-white p-6 rounded-md w-80 space-y-4">
+
+            <p className="text-sm font-medium text-center">
+              Are you sure you want to cancel your order?
+            </p>
+
+            <div className="flex gap-3">
+
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 border py-2 text-sm rounded-md"
+              >
+                No
+              </button>
+
+              <button
+                onClick={handleCancelOrder}
+                className="flex-1 bg-red-500 text-white py-2 text-sm rounded-md"
+              >
+                Yes, Cancel
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
     </div>
   );
 };
