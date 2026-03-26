@@ -4,7 +4,6 @@ import axios from "axios";
 import ProductCard from "../components/product/ProductCard";
 
 const Products = () => {
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,15 +18,23 @@ const Products = () => {
   const [tempSort, setTempSort] = useState("");
   const [tempPriceRange, setTempPriceRange] = useState("all");
 
-  const [openPrice, setOpenPrice] = useState(false);
-  const [openSort, setOpenSort] = useState(false);
+  const [desktopPriceOpen, setDesktopPriceOpen] = useState(false);
+  const [desktopSortOpen, setDesktopSortOpen] = useState(false);
 
-  const [openMobilePrice, setOpenMobilePrice] = useState(false);
-  const [openMobileSort, setOpenMobileSort] = useState(false);
+  const [mobilePriceOpen, setMobilePriceOpen] = useState(false);
+  const [mobileSortOpen, setMobileSortOpen] = useState(false);
 
   const [searchParams] = useSearchParams();
 
-  const categories = ["all","men","women","electronics","watches","footwear","audio"];
+  const categories = [
+    "all",
+    "men",
+    "women",
+    "electronics",
+    "watches",
+    "footwear",
+    "audio",
+  ];
 
   const priceOptions = [
     { label: "All", value: "all" },
@@ -43,10 +50,13 @@ const Products = () => {
     { label: "High → Low", value: "high" },
   ];
 
+  // FETCH PRODUCTS
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("https://shopzenai-mern-project.onrender.com/api/product/listproduct");
+        const res = await axios.get(
+          "https://shopzenai-mern-project.onrender.com/api/product/listproduct"
+        );
         if (res.data.success) setProducts(res.data.products);
       } finally {
         setLoading(false);
@@ -55,11 +65,13 @@ const Products = () => {
     fetchProducts();
   }, []);
 
+  // URL CATEGORY
   useEffect(() => {
     const urlCategory = searchParams.get("category");
     if (urlCategory) setFilter(urlCategory.toLowerCase());
   }, [searchParams]);
 
+  // MOBILE TEMP SYNC
   useEffect(() => {
     if (mobileFilter) {
       setTempFilter(filter);
@@ -68,45 +80,45 @@ const Products = () => {
     }
   }, [mobileFilter]);
 
+  // FILTER LOGIC
   const filteredProducts = useMemo(() => {
-
     let list = [...products];
 
-    const normalize = (v="") => v.toLowerCase().replace(/[^a-z0-9\s]/g,"").trim();
-    const getWords = (t) => normalize(t).split(/\s+/);
+    const normalize = (v = "") =>
+      v.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
 
     if (search.trim()) {
-      const words = getWords(search);
-      list = list.filter(p => {
-        const all = [...getWords(p.name),...getWords(p.category),...getWords(p.subCategory)];
-        return words.every(w => all.includes(w));
-      });
+      list = list.filter((p) =>
+        normalize(p.name).includes(normalize(search))
+      );
     }
 
     if (filter !== "all") {
-      list = list.filter(p => {
-        const all = [...getWords(p.name),...getWords(p.category),...getWords(p.subCategory)];
-        return all.includes(filter);
-      });
+      list = list.filter(
+        (p) => normalize(p.category) === normalize(filter)
+      );
     }
 
     if (priceRange !== "all") {
-      list = list.filter(p => {
+      list = list.filter((p) => {
         if (priceRange === "1000") return p.price <= 1000;
-        if (priceRange === "2000") return p.price > 1000 && p.price <= 2000;
-        if (priceRange === "5000") return p.price > 2000 && p.price <= 5000;
+        if (priceRange === "2000")
+          return p.price > 1000 && p.price <= 2000;
+        if (priceRange === "5000")
+          return p.price > 2000 && p.price <= 5000;
         if (priceRange === "5000+") return p.price > 5000;
+        return true;
       });
     }
 
-    if (sort === "low") list.sort((a,b)=>a.price-b.price);
-    if (sort === "high") list.sort((a,b)=>b.price-a.price);
+    if (sort === "low") list.sort((a, b) => a.price - b.price);
+    if (sort === "high") list.sort((a, b) => b.price - a.price);
 
     return list;
+  }, [products, search, filter, sort, priceRange]);
 
-  },[products,search,filter,sort,priceRange]);
-
-  if (loading) return <div className="text-center py-20">Loading...</div>;
+  if (loading)
+    return <div className="text-center py-20">Loading...</div>;
 
   return (
     <div className="pt-6">
@@ -118,66 +130,197 @@ const Products = () => {
             type="text"
             placeholder="Search..."
             value={search}
-            onChange={(e)=>setSearch(e.target.value)}
-            className="border w-full px-3 py-1.5 text-sm rounded-md"
+            onChange={(e) => setSearch(e.target.value)}
+            className="border w-full px-3 py-2 text-sm rounded-md"
           />
-          <button onClick={()=>setMobileFilter(true)} className="lg:hidden border px-3 py-1.5 text-sm rounded-md">
+          <button
+            onClick={() => setMobileFilter(true)}
+            className="lg:hidden border px-3 py-2 text-sm rounded-md"
+          >
             Filter
           </button>
         </div>
 
         <div className="flex flex-col lg:flex-row-reverse gap-8">
 
-          {/* FILTER */}
+          {/* DESKTOP FILTER */}
           <div className="hidden lg:block w-[220px] space-y-6">
 
             {/* CATEGORY */}
             <div>
               <p className="text-sm font-medium mb-2">Category</p>
-              {categories.map(c=>(
-                <button key={c} onClick={()=>setFilter(c)} className="block text-sm">
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setFilter(c)}
+                  className={`block text-sm mb-2 relative group
+                    ${filter === c ? "font-semibold text-black" : "text-gray-500"}
+                  `}
+                >
                   {c}
+                  <span
+                    className={`absolute left-0 -bottom-1 h-[2px] bg-black transition-all
+                      ${filter === c ? "w-full" : "w-0 group-hover:w-full"}
+                    `}
+                  />
                 </button>
               ))}
             </div>
 
             {/* PRICE */}
             <div>
-              <button onClick={()=>setOpenPrice(!openPrice)} className="w-full flex justify-between border-b">
-                Price {openPrice?"−":"+"}
+              <button
+                onClick={() => setDesktopPriceOpen(!desktopPriceOpen)}
+                className="w-full flex justify-between border-b py-2 text-sm"
+              >
+                Price
               </button>
-              {openPrice && priceOptions.map(p=>(
-                <button key={p.value} onClick={()=>setPriceRange(p.value)} className="block text-sm">
-                  {p.label}
-                </button>
-              ))}
+
+              {desktopPriceOpen &&
+                priceOptions.map((p) => (
+                  <button
+                    key={p.value}
+                    onClick={() => setPriceRange(p.value)}
+                    className={`block text-sm mb-2
+                      ${priceRange === p.value ? "font-semibold text-black" : "text-gray-500"}
+                    `}
+                  >
+                    {p.label}
+                  </button>
+                ))}
             </div>
 
             {/* SORT */}
             <div>
-              <button onClick={()=>setOpenSort(!openSort)} className="w-full flex justify-between border-b">
-                Sort {openSort?"−":"+"}
+              <button
+                onClick={() => setDesktopSortOpen(!desktopSortOpen)}
+                className="w-full flex justify-between border-b py-2 text-sm"
+              >
+                Sort
               </button>
-              {openSort && sortOptions.map(s=>(
-                <button key={s.value} onClick={()=>setSort(s.value)} className="block text-sm">
-                  {s.label}
-                </button>
-              ))}
-            </div>
 
+              {desktopSortOpen &&
+                sortOptions.map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => setSort(s.value)}
+                    className={`block text-sm mb-2
+                      ${sort === s.value ? "font-semibold text-black" : "text-gray-500"}
+                    `}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+            </div>
           </div>
 
           {/* PRODUCTS */}
           <div className="flex-1 pb-20">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-              {filteredProducts.map(p=>(
-                <ProductCard key={p._id} product={p}/>
-              ))}
-            </div>
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-lg font-semibold">No Products Found 😢</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Try changing filters or search
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+                {filteredProducts.map((p) => (
+                  <ProductCard key={p._id} product={p} />
+                ))}
+              </div>
+            )}
           </div>
-
         </div>
       </div>
+
+      {/* MOBILE FILTER */}
+      {mobileFilter && (
+        <div className="fixed inset-0 z-50 bg-black/50">
+          <div className="absolute right-0 top-0 h-full w-[80%] bg-white p-4 overflow-y-auto">
+
+            <div className="flex justify-between mb-4">
+              <h2 className="font-semibold">Filters</h2>
+              <button onClick={() => setMobileFilter(false)}>✕</button>
+            </div>
+
+            {/* CATEGORY */}
+            <div className="mb-4">
+              <p className="text-sm font-medium mb-2">Category</p>
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setTempFilter(c)}
+                  className={`block text-sm mb-2
+                    ${tempFilter === c ? "font-semibold text-black" : "text-gray-500"}
+                  `}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {/* PRICE */}
+            <div className="mb-4">
+              <button
+                onClick={() => setMobilePriceOpen(!mobilePriceOpen)}
+                className="w-full flex justify-between border-b py-2 text-sm"
+              >
+                Price
+              </button>
+
+              {mobilePriceOpen &&
+                priceOptions.map((p) => (
+                  <button
+                    key={p.value}
+                    onClick={() => setTempPriceRange(p.value)}
+                    className={`block text-sm mt-2
+                      ${tempPriceRange === p.value ? "font-semibold text-black" : "text-gray-500"}
+                    `}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+            </div>
+
+            {/* SORT */}
+            <div className="mb-4">
+              <button
+                onClick={() => setMobileSortOpen(!mobileSortOpen)}
+                className="w-full flex justify-between border-b py-2 text-sm"
+              >
+                Sort
+              </button>
+
+              {mobileSortOpen &&
+                sortOptions.map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => setTempSort(s.value)}
+                    className={`block text-sm mt-2
+                      ${tempSort === s.value ? "font-semibold text-black" : "text-gray-500"}
+                    `}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+            </div>
+
+            {/* APPLY */}
+            <button
+              onClick={() => {
+                setFilter(tempFilter);
+                setSort(tempSort);
+                setPriceRange(tempPriceRange);
+                setMobileFilter(false);
+              }}
+              className="w-full bg-black text-white py-2 mt-4 rounded"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

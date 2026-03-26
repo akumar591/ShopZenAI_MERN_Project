@@ -10,18 +10,6 @@ const AddProduct = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [openCategory, setOpenCategory] = useState(false);
-  const [openSubCategory, setOpenSubCategory] = useState(false);
-
-  const categories = {
-    Men: ["Topwear", "Bottomwear", "Jeans", "Shirts"],
-    Women: ["Topwear", "Bottomwear", "Dresses", "Ethnic"],
-    Electronics: ["Mobiles", "TV", "LED TV", "Laptops"],
-    Footwear: ["Shoes", "Sneakers", "Slippers", "Flip Flop"],
-    Audio: ["Headphones", "Earbuds", "Speakers"],
-    Watches: ["Analog", "Digital", "Smartwatch"],
-  };
-
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -39,15 +27,20 @@ const AddProduct = () => {
     setTimeout(() => setMessage(""), 3000);
   };
 
-  // ✅ IMAGE + AI
+  const toggleSize = (size) => {
+    setForm((prev) => ({
+      ...prev,
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter((s) => s !== size)
+        : [...prev.sizes, size],
+    }));
+  };
+
   const handleImage = async (key, file) => {
     if (!file) return;
 
-    setImages((prev) => ({ ...prev, [key]: file }));
-    setPreviews((prev) => ({
-      ...prev,
-      [key]: URL.createObjectURL(file),
-    }));
+    setImages((p) => ({ ...p, [key]: file }));
+    setPreviews((p) => ({ ...p, [key]: URL.createObjectURL(file) }));
 
     if (key === "image1") {
       try {
@@ -64,18 +57,18 @@ const AddProduct = () => {
         if (res.data?.success) {
           const ai = res.data.result;
 
-          setForm((prev) => ({
-            ...prev,
-            name: ai.name || prev.name,
-            description: ai.description || prev.description,
-            category: ai.category || prev.category,
-            subCategory: ai.subCategory || prev.subCategory,
+          setForm((f) => ({
+            ...f,
+            name: ai.name || f.name,
+            description: ai.description || f.description,
+            category: ai.category || f.category,
+            subCategory: ai.subCategory || f.subCategory,
           }));
 
-          showMessage("AI filled product details 🚀");
+          showMessage("AI filled product details");
         }
       } catch {
-        showMessage("AI scan failed ❌");
+        showMessage("AI scan failed");
       } finally {
         setAiLoading(false);
       }
@@ -83,61 +76,45 @@ const AddProduct = () => {
   };
 
   const removeImage = (key) => {
-    setImages((prev) => {
-      const obj = { ...prev };
+    setImages((p) => {
+      const obj = { ...p };
       delete obj[key];
       return obj;
     });
 
-    setPreviews((prev) => {
-      const obj = { ...prev };
+    setPreviews((p) => {
+      const obj = { ...p };
       delete obj[key];
       return obj;
     });
   };
 
-  // ✅ SMART SAVE FUNCTION
   const handleSave = async () => {
-    if (loading) return; // 🔒 lock
-
-    // ✅ VALIDATION
-    if (!form.name.trim()) return showMessage("Product name is required");
-    if (!form.description.trim()) return showMessage("Description is required");
-    if (!form.price || isNaN(form.price)) return showMessage("Enter valid price");
-    if (!form.category) return showMessage("Select category");
-    if (!form.subCategory) return showMessage("Select sub category");
-    if (Object.keys(images).length === 0) return showMessage("Upload at least one image");
-
     try {
       setLoading(true);
 
       const token = localStorage.getItem("adminToken");
-      if (!token) return showMessage("Admin login required");
 
       const data = new FormData();
 
-      data.append("name", form.name);
-      data.append("description", form.description);
-      data.append("price", Number(form.price));
-      data.append("category", form.category);
-      data.append("subCategory", form.subCategory);
-      data.append("sizes", JSON.stringify(form.sizes));
-      data.append("bestseller", false);
-
-      Object.keys(images).forEach((key) => {
-        data.append(key, images[key]);
+      Object.entries(form).forEach(([k, v]) => {
+        if (k === "sizes") {
+          data.append("sizes", JSON.stringify(v));
+        } else {
+          data.append(k, v);
+        }
       });
+
+      Object.keys(images).forEach((k) => data.append(k, images[k]));
 
       const res = await axios.post(
         "https://shopzenai-mern-project.onrender.com/api/product/add",
         data,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {
-        showMessage("Product published successfully 🚀");
+        showMessage("Product published successfully");
 
         setForm({
           name: "",
@@ -150,33 +127,34 @@ const AddProduct = () => {
 
         setImages({});
         setPreviews({});
-      } else {
-        showMessage(res.data.message || "Something went wrong");
       }
     } catch {
-      showMessage("Server error ❌");
+      showMessage("Failed to save product");
     } finally {
-      setLoading(false); // 🔓 unlock
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white flex flex-col pb-20">
+    <div className="min-h-screen bg-[#0f172a] text-white flex flex-col">
 
       {message && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-green-600 px-4 py-2 rounded text-sm">
-          {message}
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50">
+          <div className="bg-green-600 px-6 py-2 rounded-md shadow-lg text-sm font-semibold">
+            {message}
+          </div>
         </div>
       )}
 
-      {/* HEADER */}
-      <div className="h-14 px-4 flex items-center justify-between border-b border-white/10">
-        <h1 className="text-sm">Add Product</h1>
+      <div className="h-14 px-4 sm:px-6 flex items-center justify-between border-b border-white/10">
+        <h1 className="font-semibold text-sm sm:text-base">
+          Add Product <span className="text-indigo-400">• Draft</span>
+        </h1>
 
         <button
           onClick={handleSave}
           disabled={loading}
-          className="hidden md:block bg-indigo-600 px-4 py-1.5 rounded-md text-sm disabled:opacity-50"
+          className="bg-indigo-600 hover:bg-indigo-700 px-4 sm:px-5 py-1.5 rounded-md text-sm font-semibold"
         >
           {loading ? "Saving..." : "Publish"}
         </button>
@@ -184,8 +162,11 @@ const AddProduct = () => {
 
       <div className="flex flex-col lg:flex-row flex-1">
 
-        {/* IMAGE */}
-        <div className="w-full lg:w-[45%] p-4">
+        <div className="w-full lg:w-[45%] border-b lg:border-b-0 lg:border-l border-white/10 p-4 sm:p-6">
+
+          <h2 className="text-xs uppercase text-gray-400 mb-4">
+            Product Media
+          </h2>
 
           {aiLoading && (
             <p className="text-xs text-indigo-400 flex gap-1 mb-3">
@@ -195,22 +176,34 @@ const AddProduct = () => {
 
           <div className="grid grid-cols-2 gap-4">
             {["image1", "image2", "image3", "image4"].map((img) => (
-              <div key={img} className="h-32 border border-dashed border-white/20 rounded flex items-center justify-center relative">
+              <div
+                key={img}
+                className="h-32 sm:h-40 border border-dashed border-white/20 rounded-lg flex items-center justify-center relative"
+              >
                 {previews[img] ? (
                   <>
-                    <img src={previews[img]} className="w-full h-full object-cover rounded" />
-                    <button onClick={() => removeImage(img)} className="absolute top-2 right-2 bg-black/70 p-1 rounded-full">
+                    <img
+                      src={previews[img]}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+
+                    <button
+                      onClick={() => removeImage(img)}
+                      className="absolute top-2 right-2 bg-black/70 p-1 rounded-full"
+                    >
                       <X size={14} />
                     </button>
                   </>
                 ) : (
-                  <label className="text-xs cursor-pointer text-center">
+                  <label className="text-xs text-gray-400 text-center cursor-pointer">
                     <Upload className="mx-auto mb-1" />
                     Upload
                     <input
                       type="file"
                       hidden
-                      onChange={(e) => handleImage(img, e.target.files[0])}
+                      onChange={(e) =>
+                        handleImage(img, e.target.files[0])
+                      }
                     />
                   </label>
                 )}
@@ -219,79 +212,101 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* FORM */}
-        <div className="w-full lg:w-[55%] p-4 space-y-6">
+        <div className="w-full lg:w-[55%] p-4 sm:p-6 lg:p-8 space-y-6">
 
-          <Input label="Product name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
-          <Textarea label="Description" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
-          <Input label="Price" value={form.price} onChange={(v) => setForm({ ...form, price: v === "" ? "" : Number(v) })} />
+          <EditorInput
+            label="Product name"
+            value={form.name}
+            onChange={(v) => setForm({ ...form, name: v })}
+            big
+          />
+
+          <EditorTextarea
+            label="Description"
+            value={form.description}
+            onChange={(v) => setForm({ ...form, description: v })}
+          />
+
+          <EditorInput
+            label="Price"
+            value={form.price}
+            onChange={(v) => setForm({ ...form, price: v })}
+          />
+
+          <div>
+            <label className="text-xs text-gray-400">Sizes</label>
+
+            <div className="flex flex-wrap gap-2 mt-2">
+              {["S", "M", "L", "XL", "XXL"].map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => toggleSize(size)}
+                  className={`px-3 py-1 rounded border text-sm ${
+                    form.sizes.includes(size)
+                      ? "bg-indigo-600 border-indigo-600"
+                      : "border-white/20"
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <EditorInput
+              label="Category"
+              value={form.category}
+              onChange={(v) => setForm({ ...form, category: v })}
+            />
 
-            <div className="relative">
-              <label className="text-xs text-gray-400">Category</label>
-              <div onClick={() => { setOpenCategory(!openCategory); setOpenSubCategory(false); }} className="border-b border-white/20 py-2 cursor-pointer">
-                {form.category || "Select Category"}
-              </div>
-
-              {openCategory && (
-                <div className="absolute z-50 w-full bg-[#0f172a] border border-white/10 mt-2 rounded">
-                  {Object.keys(categories).map((cat) => (
-                    <div key={cat} onClick={() => { setForm({ ...form, category: cat, subCategory: "" }); setOpenCategory(false); }} className="p-2 hover:bg-indigo-600 cursor-pointer">
-                      {cat}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              <label className="text-xs text-gray-400">Sub Category</label>
-              <div onClick={() => {
-                if (!form.category) return showMessage("Select category first");
-                setOpenSubCategory(!openSubCategory);
-                setOpenCategory(false);
-              }} className="border-b border-white/20 py-2 cursor-pointer">
-                {form.subCategory || "Select Sub Category"}
-              </div>
-
-              {openSubCategory && form.category && (
-                <div className="absolute z-50 w-full bg-[#0f172a] border border-white/10 mt-2 rounded">
-                  {categories[form.category].map((sub) => (
-                    <div key={sub} onClick={() => { setForm({ ...form, subCategory: sub }); setOpenSubCategory(false); }} className="p-2 hover:bg-indigo-600 cursor-pointer">
-                      {sub}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
+            <EditorInput
+              label="Sub Category"
+              value={form.subCategory}
+              onChange={(v) => setForm({ ...form, subCategory: v })}
+            />
           </div>
+
         </div>
       </div>
 
-      {/* MOBILE BUTTON */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#0f172a] border-t border-white/10 p-4 flex justify-center">
-        <button onClick={handleSave} disabled={loading} className="w-[90%] bg-indigo-600 py-3 rounded-lg">
-          {loading ? "Saving..." : "Publish Product"}
-        </button>
-      </div>
-
+      <button
+        onClick={() => navigate("/admin/dashboard")}
+        className="fixed md:hidden bottom-5 right-5 bg-indigo-600 hover:bg-indigo-700 px-4 py-3 rounded-full shadow-lg text-sm"
+      >
+        Dashboard
+      </button>
     </div>
   );
 };
 
-const Input = ({ label, value, onChange }) => (
+const EditorInput = ({ label, value, onChange, big }) => (
   <div>
     <label className="text-xs text-gray-400">{label}</label>
-    <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-transparent border-b border-white/20 py-2" />
+
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`w-full bg-transparent border-b border-white/20 outline-none py-2 ${
+        big ? "text-2xl font-semibold" : "text-sm"
+      }`}
+      placeholder="Type here…"
+    />
   </div>
 );
 
-const Textarea = ({ label, value, onChange }) => (
+const EditorTextarea = ({ label, value, onChange }) => (
   <div>
     <label className="text-xs text-gray-400">{label}</label>
-    <textarea rows={5} value={value || ""} onChange={(e) => onChange(e.target.value)} className="w-full bg-transparent border-b border-white/20 py-2 resize-none" />
+
+    <textarea
+      rows={5}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full bg-transparent border-b border-white/20 outline-none py-2 text-sm resize-none"
+      placeholder="Write product description…"
+    />
   </div>
 );
 
