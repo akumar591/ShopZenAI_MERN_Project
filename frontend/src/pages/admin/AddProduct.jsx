@@ -6,7 +6,15 @@ const categoryData = {
   men: ["T-Shirts", "Shirts", "Jeans", "Jackets", "Shorts", "Ethnic Wear"],
   women: ["Dresses", "Tops", "Kurtis", "Jeans", "Sarees", "Skirts"],
   kids: ["T-Shirts", "Frocks", "Shorts", "Jeans", "Ethnic Wear"],
-  footwear: ["Sneakers", "Sport Shoes", "Formal Shoes", "Sandals", "Boots", "Flip-Flops", "Slippers"],
+  footwear: [
+    "Sneakers",
+    "Sport Shoes",
+    "Formal Shoes",
+    "Sandals",
+    "Boots",
+    "Flip-Flops",
+    "Slippers",
+  ],
   watches: ["Analog Watches", "Digital Watches", "Smart Watches"],
   electronics: ["Mobiles", "Laptops", "Tablets", "Cameras"],
   audio: ["Headphones", "Earbuds", "Speakers", "Soundbars"],
@@ -59,7 +67,6 @@ const AddProduct = () => {
     setImages((p) => ({ ...p, [key]: file }));
     setPreviews((p) => ({ ...p, [key]: URL.createObjectURL(file) }));
 
-    // ✅ AI FEATURE (RESTORED)
     if (key === "image1") {
       try {
         setAiLoading(true);
@@ -69,7 +76,7 @@ const AddProduct = () => {
 
         const res = await axios.post(
           "https://shopzenai-mern-project.onrender.com/api/ai/scan-image",
-          fd
+          fd,
         );
 
         if (res.data?.success) {
@@ -108,6 +115,18 @@ const AddProduct = () => {
   };
 
   const handleSave = async () => {
+    // ✅ REQUIRED VALIDATION (ADDED)
+    if (
+      !form.name ||
+      !form.description ||
+      !form.price ||
+      !form.category ||
+      !form.subCategory ||
+      Object.keys(images).length === 0 // ✅ IMAGE VALIDATION (NEW)
+    ) {
+      return showMessage("All fields are required");
+    }
+
     try {
       setLoading(true);
 
@@ -125,7 +144,7 @@ const AddProduct = () => {
       const res = await axios.post(
         "https://shopzenai-mern-project.onrender.com/api/product/add",
         data,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (res.data.success) {
@@ -142,9 +161,13 @@ const AddProduct = () => {
 
         setImages({});
         setPreviews({});
+      } else {
+        // ✅ ERROR MESSAGE (ADDED)
+        showMessage(res.data.message || "Failed to save product");
       }
-    } catch {
-      showMessage("Failed to save product");
+    } catch (err) {
+      // ✅ ERROR MESSAGE (ADDED)
+      showMessage(err.response?.data?.message || "Failed to save product");
     } finally {
       setLoading(false);
     }
@@ -152,7 +175,6 @@ const AddProduct = () => {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white flex flex-col">
-
       {message && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50">
           <div className="bg-green-600 px-6 py-2 rounded-md text-sm font-semibold">
@@ -178,11 +200,7 @@ const AddProduct = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row flex-1">
-
-        {/* IMAGE SECTION */}
         <div className="w-full lg:w-[45%] p-4">
-
-          {/* ✅ AI LOADING UI */}
           {aiLoading && (
             <p className="text-xs text-indigo-400 flex gap-1 mb-3">
               <Sparkles size={14} /> AI analyzing image…
@@ -191,11 +209,20 @@ const AddProduct = () => {
 
           <div className="grid grid-cols-2 gap-4">
             {["image1", "image2", "image3", "image4"].map((img) => (
-              <div key={img} className="h-32 border border-dashed border-white/20 rounded-lg flex items-center justify-center relative">
+              <div
+                key={img}
+                className="h-32 border border-dashed border-white/20 rounded-lg flex items-center justify-center relative"
+              >
                 {previews[img] ? (
                   <>
-                    <img src={previews[img]} className="w-full h-full object-cover rounded-lg" />
-                    <button onClick={() => removeImage(img)} className="absolute top-2 right-2 bg-black/70 p-1 rounded-full">
+                    <img
+                      src={previews[img]}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => removeImage(img)}
+                      className="absolute top-2 right-2 bg-black/70 p-1 rounded-full"
+                    >
                       <X size={14} />
                     </button>
                   </>
@@ -203,7 +230,11 @@ const AddProduct = () => {
                   <label className="text-xs text-gray-400 text-center cursor-pointer">
                     <Upload className="mx-auto mb-1" />
                     Upload
-                    <input type="file" hidden onChange={(e) => handleImage(img, e.target.files[0])} />
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e) => handleImage(img, e.target.files[0])}
+                    />
                   </label>
                 )}
               </div>
@@ -211,15 +242,25 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* FORM */}
         <div className="w-full lg:w-[55%] p-4 space-y-6">
-
-          <EditorInput label="Product Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
-          <EditorTextarea label="Description" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
-          <EditorInput label="Price" type="number" value={form.price} onChange={(v) => setForm({ ...form, price: v })} />
+          <EditorInput
+            label="Product Name"
+            value={form.name}
+            onChange={(v) => setForm({ ...form, name: v })}
+          />
+          <EditorTextarea
+            label="Description"
+            value={form.description}
+            onChange={(v) => setForm({ ...form, description: v })}
+          />
+          <EditorInput
+            label="Price"
+            type="number"
+            value={form.price}
+            onChange={(v) => setForm({ ...form, price: v })}
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
             <CustomDropdown
               label="Category"
               options={Object.keys(categoryData)}
@@ -238,13 +279,10 @@ const AddProduct = () => {
               label="Sub Category"
               options={categoryData[form.category] || []}
               value={form.subCategory}
-              onChange={(val) =>
-                setForm({ ...form, subCategory: val })
-              }
+              onChange={(val) => setForm({ ...form, subCategory: val })}
               disabled={!form.category}
               showMessage={showMessage}
             />
-
           </div>
 
           {getSizes().length > 0 && (
@@ -267,11 +305,10 @@ const AddProduct = () => {
               </div>
             </div>
           )}
-
         </div>
       </div>
 
-      <div className="fixed md:hidden bottom-5 left-0 w-full px-4">
+      <div className="md:hidden bottom-5 left-0 w-full px-4">
         <button
           onClick={handleSave}
           disabled={loading}
@@ -286,8 +323,15 @@ const AddProduct = () => {
   );
 };
 
-// CUSTOM DROPDOWN
-const CustomDropdown = ({ label, options, value, onChange, disabled, showMessage }) => {
+// CUSTOM DROPDOWN SAME
+const CustomDropdown = ({
+  label,
+  options,
+  value,
+  onChange,
+  disabled,
+  showMessage,
+}) => {
   const [open, setOpen] = useState(false);
   const ref = useRef();
 
