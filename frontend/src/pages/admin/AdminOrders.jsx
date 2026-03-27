@@ -8,6 +8,7 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [productMap, setProductMap] = useState({});
   const [loading, setLoading] = useState(true);
+  const [newOrdersCount, setNewOrdersCount] = useState(0); // ✅ NEW
 
   const adminToken = localStorage.getItem("adminToken");
 
@@ -25,14 +26,25 @@ const AdminOrders = () => {
       );
 
       if (res.data.success) {
-        setOrders(res.data.orders);
+        // ✅ latest first
+        const latestOrders = [...res.data.orders].reverse();
+        setOrders(latestOrders);
+
+        // ✅ NEW ORDER COUNT FIX
+        const lastCount = Number(localStorage.getItem("lastOrderCount") || 0);
+        const newCount = latestOrders.length - lastCount;
+
+        setNewOrdersCount(newCount > 0 ? newCount : 0);
+
+        // update stored count
+        localStorage.setItem("lastOrderCount", latestOrders.length);
       }
     } catch (err) {
       console.error("Admin order fetch error", err.response?.data);
     }
   };
 
-  /* ================= FETCH PRODUCTS (FOR NAME + IMAGE) ================= */
+  /* ================= FETCH PRODUCTS ================= */
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
@@ -92,6 +104,11 @@ const AdminOrders = () => {
         <h1 className="text-3xl font-bold">Orders</h1>
         <p className="text-sm text-gray-400 mt-1">
           Manage customer orders • Total {orders.length}
+        </p>
+
+        {/* ✅ NEW ORDER COUNT */}
+        <p className="text-sm text-indigo-400 mt-1">
+          New Orders: {newOrdersCount}
         </p>
       </div>
 
@@ -205,7 +222,7 @@ const AdminOrders = () => {
         ))}
       </div>
 
-      {/* ================= MOBILE DASHBOARD FAB ================= */}
+      {/* MOBILE DASHBOARD BUTTON */}
       <button
         onClick={() => navigate("/admin/dashboard")}
         className="

@@ -25,7 +25,8 @@ const ProductList = () => {
       );
 
       if (res.data.success) {
-        setProducts(res.data.products);
+        // ✅ ONLY CHANGE (latest first)
+        setProducts([...res.data.products].reverse());
       }
     } catch {
       showMessage("Failed to load products ❌");
