@@ -3,9 +3,22 @@ import axios from "axios";
 import { Upload, X, Sparkles } from "lucide-react";
 
 const categoryData = {
-  men: ["T-Shirts", "Shirts", "Jeans", "Jackets", "Shorts", "Ethnic Wear"],
+  men: [
+    "T-Shirts",
+    "Shirts",
+    "Jeans",
+    "Jackets",
+    "Shorts",
+    "Ethnic Wear",
+    "Suits",
+    "Blazers",
+    "Coats",
+  ],
+
   women: ["Dresses", "Tops", "Kurtis", "Jeans", "Sarees", "Skirts"],
+
   kids: ["T-Shirts", "Frocks", "Shorts", "Jeans", "Ethnic Wear"],
+
   footwear: [
     "Sneakers",
     "Sport Shoes",
@@ -15,9 +28,32 @@ const categoryData = {
     "Flip-Flops",
     "Slippers",
   ],
+
   watches: ["Analog Watches", "Digital Watches", "Smart Watches"],
+
   electronics: ["Mobiles", "Laptops", "Tablets", "Cameras"],
+
   audio: ["Headphones", "Earbuds", "Speakers", "Soundbars"],
+
+  beauty: [
+    "Skincare",
+    "Makeup",
+    "Hair Care",
+    "Fragrances",
+    "Men Grooming",
+    "Beauty Tools",
+  ],
+
+  grocery: [
+    "Staples (Rice, Atta, Dal)",
+    "Snacks & Packaged Food",
+    "Beverages",
+    "Dairy Products",
+    "Fruits & Vegetables",
+    "Spices & Masala",
+    "Cooking Oils",
+    "Bakery Items",
+  ],
 };
 
 const AddProduct = () => {
@@ -45,10 +81,39 @@ const AddProduct = () => {
   const getSizes = () => {
     if (form.category === "men" || form.category === "women")
       return ["S", "M", "L", "XL", "XXL"];
+
     if (form.category === "kids")
       return ["1 Year", "2 Year", "3 Year", "4 Year", "5 Year"];
+
     if (form.category === "footwear") return ["6", "7", "8", "9", "10"];
+
     if (form.category === "watches") return ["Small", "Medium", "Large"];
+
+    // ✅ NEW: Grocery Smart Sizes
+    if (form.category === "grocery") {
+      const sub = form.subCategory;
+
+      if (sub === "Staples (Rice, Atta, Dal)")
+        return ["250g", "500g", "1kg", "2kg", "5kg"];
+
+      if (sub === "Snacks & Packaged Food")
+        return ["1 Packet", "2 Packet", "3 Packet", "5 Packet"];
+
+      if (sub === "Beverages") return ["250ml", "500ml", "1L", "2L"];
+
+      if (sub === "Dairy Products") return ["250ml", "500ml", "1L"];
+
+      if (sub === "Fruits & Vegetables") return ["250g", "500g", "1kg"];
+
+      if (sub === "Spices & Masala") return ["100g", "200g", "500g"];
+
+      if (sub === "Cooking Oils") return ["500ml", "1L", "2L", "5L"];
+
+      if (sub === "Bakery Items") return ["1 Packet", "2 Packet", "3 Packet"];
+
+      return [];
+    }
+
     return [];
   };
 

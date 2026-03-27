@@ -4,17 +4,47 @@ import {
   Laptop,
   Watch,
   ShoppingBag,
-  Headphones,
-  Footprints,
+  Sparkles,
+  ShoppingCart,
 } from "lucide-react";
 
 const categories = [
-  { id: 1, name: "Men", icon: <Shirt size={26} />, link: "/products?category=men" },
-  { id: 2, name: "Women", icon: <ShoppingBag size={26} />, link: "/products?category=women" },
-  { id: 3, name: "Electronics", icon: <Laptop size={26} />, link: "/products?category=electronics" },
-  { id: 4, name: "Watches", icon: <Watch size={26} />, link: "/products?category=watches" },
-  { id: 5, name: "Footwear", icon: <Footprints size={26} />, link: "/products?category=footwear" },
-  { id: 6, name: "Audio", icon: <Headphones size={26} />, link: "/products?category=audio" },
+  {
+    id: 1,
+    name: "Men",
+    icon: <Shirt size={26} />,
+    link: "/products?category=men",
+  },
+  {
+    id: 2,
+    name: "Women",
+    icon: <ShoppingBag size={26} />,
+    link: "/products?category=women",
+  },
+  {
+    id: 3,
+    name: "Electronics",
+    icon: <Laptop size={26} />,
+    link: "/products?category=electronics",
+  },
+  {
+    id: 4,
+    name: "Watches",
+    icon: <Watch size={26} />,
+    link: "/products?category=watches",
+  },
+  {
+    id: 5,
+    name: "Beauty",
+    icon: <Sparkles size={26} />,
+    link: "/products?category=beauty",
+  },
+  {
+    id: 6,
+    name: "Grocery",
+    icon: <ShoppingCart size={26} />,
+    link: "/products?category=grocery",
+  },
 ];
 
 const CategorySlider = () => {
@@ -49,12 +79,13 @@ const CategorySlider = () => {
           ))}
         </div>
 
-        {/* DESKTOP SLIDER */}
+        {/* DESKTOP VIEW */}
         <div
           className="
             hidden md:flex
             gap-4
             justify-center
+            flex-wrap
           "
         >
           {categories.map((cat) => (

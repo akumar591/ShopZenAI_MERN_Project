@@ -30,8 +30,11 @@ const Products = () => {
     "all",
     "men",
     "women",
+    "kids",
     "electronics",
     "watches",
+    "beauty",
+    "grocery",
     "footwear",
     "audio",
   ];
@@ -55,7 +58,7 @@ const Products = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          "https://shopzenai-mern-project.onrender.com/api/product/listproduct"
+          "https://shopzenai-mern-project.onrender.com/api/product/listproduct",
         );
         if (res.data.success) setProducts(res.data.products);
       } finally {
@@ -85,27 +88,24 @@ const Products = () => {
     let list = [...products];
 
     const normalize = (v = "") =>
-      v.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+      v
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
+        .trim();
 
     if (search.trim()) {
-      list = list.filter((p) =>
-        normalize(p.name).includes(normalize(search))
-      );
+      list = list.filter((p) => normalize(p.name).includes(normalize(search)));
     }
 
     if (filter !== "all") {
-      list = list.filter(
-        (p) => normalize(p.category) === normalize(filter)
-      );
+      list = list.filter((p) => normalize(p.category) === normalize(filter));
     }
 
     if (priceRange !== "all") {
       list = list.filter((p) => {
         if (priceRange === "1000") return p.price <= 1000;
-        if (priceRange === "2000")
-          return p.price > 1000 && p.price <= 2000;
-        if (priceRange === "5000")
-          return p.price > 2000 && p.price <= 5000;
+        if (priceRange === "2000") return p.price > 1000 && p.price <= 2000;
+        if (priceRange === "5000") return p.price > 2000 && p.price <= 5000;
         if (priceRange === "5000+") return p.price > 5000;
         return true;
       });
@@ -117,13 +117,11 @@ const Products = () => {
     return list;
   }, [products, search, filter, sort, priceRange]);
 
-  if (loading)
-    return <div className="text-center py-20">Loading...</div>;
+  if (loading) return <div className="text-center py-20">Loading...</div>;
 
   return (
     <div className="pt-6">
       <div className="max-w-7xl mx-auto px-4">
-
         {/* SEARCH */}
         <div className="flex gap-2 mb-4">
           <input
@@ -142,10 +140,8 @@ const Products = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row-reverse gap-8">
-
           {/* DESKTOP FILTER */}
           <div className="hidden lg:block w-[220px] space-y-6">
-
             {/* CATEGORY */}
             <div>
               <p className="text-sm font-medium mb-2">Category</p>
@@ -238,7 +234,6 @@ const Products = () => {
       {mobileFilter && (
         <div className="fixed inset-0 z-50 bg-black/50">
           <div className="absolute right-0 top-0 h-full w-[80%] bg-white p-4 overflow-y-auto">
-
             <div className="flex justify-between mb-4">
               <h2 className="font-semibold">Filters</h2>
               <button onClick={() => setMobileFilter(false)}>✕</button>
