@@ -22,14 +22,10 @@ const Navbar = () => {
   const { logout, adminLogout } = useAuth();
   const navigate = useNavigate();
 
-  // 🔐 SESSION CHECKS
   const token = localStorage.getItem("token");
   const adminSession = localStorage.getItem("adminSession") === "true";
 
-  // 🧠 Cart count
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
-
-  /* ================= LOGOUT ================= */
 
   const handleUserLogout = () => {
     logout();
@@ -47,7 +43,7 @@ const Navbar = () => {
 
         <div className="flex justify-between items-center h-16">
 
-          {/* ================= LOGO ================= */}
+          {/* LOGO */}
           <Link
             to="/"
             className="text-2xl font-bold text-indigo-600 tracking-wide"
@@ -56,7 +52,7 @@ const Navbar = () => {
             <span className="text-sm text-indigo-500 ml-1">AI</span>
           </Link>
 
-          {/* ================= DESKTOP MENU ================= */}
+          {/* DESKTOP MENU */}
           <div className="hidden md:flex items-center gap-8">
             <Link to="/" className="hover:text-indigo-600">
               Home
@@ -67,19 +63,20 @@ const Navbar = () => {
             </Link>
 
             <Link to="/products" className="hover:text-indigo-600">
-              Products
+              Shop
+            </Link>
+
+            <Link to="/contact" className="hover:text-indigo-600">
+              Contact
             </Link>
           </div>
 
-          {/* ================= RIGHT SIDE ================= */}
+          {/* RIGHT SIDE */}
           <div className="hidden md:flex items-center gap-6 relative">
 
-            {/* ================= ADMIN MODE ================= */}
             {adminSession && (
               <>
-                {/* ADMIN DROPDOWN */}
                 <div className="relative">
-
                   <button
                     onClick={() => setAdminMenu(!adminMenu)}
                     className="flex items-center gap-2 text-indigo-600 font-semibold"
@@ -91,57 +88,32 @@ const Navbar = () => {
 
                   {adminMenu && (
                     <div className="absolute right-0 mt-3 w-48 bg-white shadow-lg border rounded-lg overflow-hidden">
-
-                      <Link
-                        to="/admin/dashboard"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                        onClick={() => setAdminMenu(false)}
-                      >
+                      <Link to="/admin/dashboard" className="block px-4 py-2 hover:bg-gray-100">
                         Dashboard
                       </Link>
-
-                      <Link
-                        to="/admin/add-product"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                        onClick={() => setAdminMenu(false)}
-                      >
+                      <Link to="/admin/add-product" className="block px-4 py-2 hover:bg-gray-100">
                         Add Product
                       </Link>
-
-                      <Link
-                        to="/admin/products"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                        onClick={() => setAdminMenu(false)}
-                      >
+                      <Link to="/admin/products" className="block px-4 py-2 hover:bg-gray-100">
                         Products List
                       </Link>
-
-                      <Link
-                        to="/admin/orders"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                        onClick={() => setAdminMenu(false)}
-                      >
+                      <Link to="/admin/orders" className="block px-4 py-2 hover:bg-gray-100">
                         Orders List
                       </Link>
-
                     </div>
                   )}
                 </div>
 
-                {/* ADMIN LOGOUT ICON */}
                 <button onClick={handleAdminLogout}>
                   <LogOut className="hover:text-red-500" />
                 </button>
               </>
             )}
 
-            {/* ================= USER MODE ================= */}
             {!adminSession && (
               <>
-                {/* CART */}
                 <Link to="/cart" className="relative">
                   <ShoppingCart className="hover:text-indigo-600" />
-
                   {cartCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
                       {cartCount}
@@ -149,19 +121,16 @@ const Navbar = () => {
                   )}
                 </Link>
 
-                {/* ORDERS */}
                 {token && (
                   <Link to="/orders">
                     <Package className="hover:text-indigo-600" />
                   </Link>
                 )}
 
-                {/* PROFILE */}
                 <Link to={token ? "/profile" : "/auth"}>
                   <User className="hover:text-indigo-600" />
                 </Link>
 
-                {/* LOGOUT */}
                 {token && (
                   <button onClick={handleUserLogout}>
                     <LogOut className="hover:text-red-500" />
@@ -171,65 +140,38 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* ================= MOBILE BUTTON ================= */}
-          <button
-            className="md:hidden"
-            onClick={() => setOpen(!open)}
-          >
+          {/* MOBILE BUTTON */}
+          <button className="md:hidden" onClick={() => setOpen(!open)}>
             {open ? <X size={26} /> : <Menu size={26} />}
           </button>
 
         </div>
       </div>
 
-      {/* ================= MOBILE MENU ================= */}
+      {/* MOBILE DRAWER */}
       {open && (
-        <div className="md:hidden bg-white shadow-lg border-t">
+        <div className="fixed inset-0 z-50 flex">
 
-          <div className="flex flex-col px-6 py-4 gap-4 text-lg">
+          {/* BACKDROP */}
+          <div
+            className="w-1/2 bg-black/40"
+            onClick={() => setOpen(false)}
+          />
 
-            <Link onClick={() => setOpen(false)} to="/">
-              Home
-            </Link>
+          {/* DRAWER */}
+          <div className="w-1/2 bg-white shadow-xl p-6 flex flex-col gap-5 text-lg">
 
-            <Link onClick={() => setOpen(false)} to="/about">
-              About
-            </Link>
+            <Link onClick={() => setOpen(false)} to="/">Home</Link>
+            <Link onClick={() => setOpen(false)} to="/about">About</Link>
+            <Link onClick={() => setOpen(false)} to="/products">Shop</Link>
+            <Link onClick={() => setOpen(false)} to="/contact">Contact</Link>
 
-            <Link onClick={() => setOpen(false)} to="/products">
-              Products
-            </Link>
-
-            {/* ADMIN MOBILE MENU */}
             {adminSession && (
               <>
-                <Link
-                  onClick={() => setOpen(false)}
-                  to="/admin/dashboard"
-                >
-                  Dashboard
-                </Link>
-
-                <Link
-                  onClick={() => setOpen(false)}
-                  to="/admin/add-product"
-                >
-                  Add Product
-                </Link>
-
-                <Link
-                  onClick={() => setOpen(false)}
-                  to="/admin/products"
-                >
-                  Products List
-                </Link>
-
-                <Link
-                  onClick={() => setOpen(false)}
-                  to="/admin/orders"
-                >
-                  Orders List
-                </Link>
+                <Link onClick={() => setOpen(false)} to="/admin/dashboard">Dashboard</Link>
+                <Link onClick={() => setOpen(false)} to="/admin/add-product">Add Product</Link>
+                <Link onClick={() => setOpen(false)} to="/admin/products">Products List</Link>
+                <Link onClick={() => setOpen(false)} to="/admin/orders">Orders List</Link>
 
                 <button
                   onClick={() => {
@@ -243,16 +185,10 @@ const Navbar = () => {
               </>
             )}
 
-            {/* USER MOBILE MENU */}
             {!adminSession && (
               <>
-                <Link
-                  onClick={() => setOpen(false)}
-                  to="/cart"
-                  className="flex justify-between"
-                >
+                <Link onClick={() => setOpen(false)} to="/cart" className="flex justify-between">
                   Cart
-
                   {cartCount > 0 && (
                     <span className="bg-red-500 text-white text-xs px-2 rounded-full">
                       {cartCount}
@@ -261,18 +197,12 @@ const Navbar = () => {
                 </Link>
 
                 {token && (
-                  <Link
-                    onClick={() => setOpen(false)}
-                    to="/orders"
-                  >
+                  <Link onClick={() => setOpen(false)} to="/orders">
                     Orders
                   </Link>
                 )}
 
-                <Link
-                  onClick={() => setOpen(false)}
-                  to={token ? "/profile" : "/auth"}
-                >
+                <Link onClick={() => setOpen(false)} to={token ? "/profile" : "/auth"}>
                   Profile
                 </Link>
 

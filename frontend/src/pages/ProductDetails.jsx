@@ -74,142 +74,152 @@ const ProductDetails = () => {
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen pb-20">
+  <div className="bg-gray-100 min-h-screen pb-20">
 
-      <div className="max-w-7xl mx-auto md:px-6 md:py-10">
-        <div className="grid md:grid-cols-2 gap-8 bg-white md:p-6 md:rounded-xl md:shadow">
+    <div className="max-w-7xl mx-auto md:px-6 md:py-10">
+      <div className="grid md:grid-cols-2 gap-8 bg-white md:p-6 md:rounded-xl md:shadow">
 
-          {/* IMAGE */}
-          <div>
-            <img
-              src={product.image?.[0]}
-              alt={product.name}
-              className="w-full h-[320px] md:h-[420px] object-cover md:rounded-lg"
-            />
-          </div>
+        {/* IMAGE */}
+        <div>
+          <img
+            src={product.image?.[0]}
+            alt={product.name}
+            className="w-full h-[320px] md:h-[420px] object-cover md:rounded-lg"
+          />
+        </div>
 
-          {/* DETAILS */}
-          <div className="p-4 md:p-0">
+        {/* DETAILS */}
+        <div className="p-4 md:p-0">
 
-            <p className="text-xs text-indigo-600 uppercase font-medium">
-              {product.category}
-            </p>
+          <p className="text-xs text-indigo-600 uppercase font-medium">
+            {product.category}
+          </p>
 
-            <h1 className="text-xl md:text-3xl font-bold text-gray-900 mt-1">
-              {product.name}
-            </h1>
+          {/* ✅ BEST SELLER BADGE */}
+          {product.bestSeller && (
+            <span className="inline-block mt-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded-full font-semibold">
+              🔥 Best Seller
+            </span>
+          )}
 
-            <p className="text-2xl text-indigo-600 font-bold mt-2">
-              ₹{product.price}
-            </p>
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 mt-1">
+            {product.name}
+          </h1>
 
-            <p className="mt-3 text-sm text-gray-600 leading-relaxed">
-              {product.description}
-            </p>
+          <p className="text-2xl text-indigo-600 font-bold mt-2">
+            ₹{product.price}
+          </p>
 
-            {/* SIZE */}
-            {product.sizes?.length > 0 && (
-              <div className="mt-5">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Select Size
-                </p>
+          <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+            {product.description}
+          </p>
 
-                <div className="flex gap-2 flex-wrap">
-                  {product.sizes.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setSize(s)}
-                      className={`px-3 py-1.5 text-sm border ${
+          {/* SIZE */}
+          {product.sizes?.length > 0 && (
+            <div className="mt-5">
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Select Size
+              </p>
+
+              <div className="flex gap-2 flex-wrap">
+                {product.sizes.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSize(s)}
+                    className={`px-3 py-1.5 text-sm border rounded-md  /* ✅ ADDED */
+                      ${
                         size === s
                           ? "bg-indigo-600 text-white border-indigo-600"
                           : "bg-white hover:border-indigo-500"
                       }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* QUANTITY */}
-            <div className="mt-5 flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">
-                Quantity
-              </span>
-
-              <div className="flex items-center border">
-                <button
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="px-3 py-1"
-                >
-                  -
-                </button>
-
-                <span className="px-3">{qty}</span>
-
-                <button
-                  onClick={() => setQty((q) => q + 1)}
-                  className="px-3 py-1"
-                >
-                  +
-                </button>
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
             </div>
+          )}
 
-            {/* DESKTOP BUTTON */}
-            <button
-              onClick={handleAddToCart}
-              className="
-                hidden md:flex
-                mt-8
-                items-center gap-2
-                bg-indigo-600
-                text-white
-                px-6 py-3
-                hover:bg-indigo-700
-                transition
-              "
-            >
-              <ShoppingCart size={18} />
-              Add to Cart
-            </button>
+          {/* QUANTITY */}
+          <div className="mt-5 flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700">
+              Quantity
+            </span>
 
-            {/* BACK */}
-            <button
-              onClick={() => navigate(-1)}
-              className="mt-4 text-xs text-gray-500 underline"
-            >
-              ← Back to products
-            </button>
+            <div className="flex items-center border rounded-md"> {/* ✅ ADDED */}
+              <button
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                className="px-3 py-1"
+              >
+                -
+              </button>
 
+              <span className="px-3">{qty}</span>
+
+              <button
+                onClick={() => setQty((q) => q + 1)}
+                className="px-3 py-1"
+              >
+                +
+              </button>
+            </div>
           </div>
+
+          {/* DESKTOP BUTTON */}
+          <button
+            onClick={handleAddToCart}
+            className="
+              hidden md:flex
+              mt-8
+              items-center gap-2
+              bg-indigo-600
+              text-white
+              px-6 py-3
+              hover:bg-indigo-700
+              transition
+              rounded-md   /* ✅ ADDED */
+            "
+          >
+            <ShoppingCart size={18} />
+            Add to Cart
+          </button>
+
+          {/* BACK */}
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-4 text-xs text-gray-500 underline"
+          >
+            ← Back to products
+          </button>
+
         </div>
       </div>
+    </div>
 
-      {/* 🔥 MOBILE FIXED BUTTON */}
-      <div className="sm:hidden fixed bottom-0 left-0 w-full bg-white border-t px-4 py-2 z-50">
+    {/* MOBILE BUTTON */}
+    <div className="sm:hidden fixed bottom-0 left-0 w-full bg-white border-t px-4 py-2 z-50">
 
-        <button
-          onClick={handleAddToCart}
-          className="
-            w-full
-            flex items-center justify-center gap-2
-            bg-indigo-600
-            text-white
-            py-2.5
-            text-sm font-medium
-            hover:bg-indigo-700
-            transition
-          "
-        >
-          <ShoppingCart size={18} />
-          Add to Cart
-        </button>
-
-      </div>
+      <button
+        onClick={handleAddToCart}
+        className="
+          w-full
+          flex items-center justify-center gap-2
+          bg-indigo-600
+          text-white
+          py-2.5
+          text-sm font-medium
+          hover:bg-indigo-700
+          transition
+          rounded-md   /* ✅ ADDED */
+        "
+      >
+        <ShoppingCart size={18} />
+        Add to Cart
+      </button>
 
     </div>
+
+  </div>
   );
 };
 

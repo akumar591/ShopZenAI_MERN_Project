@@ -1,18 +1,10 @@
 import { Link } from "react-router-dom";
-import {
-  Facebook,
-  Instagram,
-  Twitter,
-  Linkedin,
-} from "lucide-react";
 
 const Footer = () => {
   return (
     <footer className="bg-gradient-to-r mt-4 from-gray-900 via-gray-800 to-gray-900 text-gray-300">
-      
       {/* TOP */}
       <div className="max-w-7xl mx-auto px-6 py-14 grid gap-10 sm:grid-cols-2 md:grid-cols-4">
-        
         {/* BRAND */}
         <div>
           <h2 className="text-2xl font-bold text-white">
@@ -26,51 +18,69 @@ const Footer = () => {
 
         {/* QUICK LINKS */}
         <div>
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Quick Links
-          </h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/" className="hover:text-indigo-400">Home</Link></li>
-            <li><Link to="/products" className="hover:text-indigo-400">Products</Link></li>
-            <li><Link to="/about" className="hover:text-indigo-400">About</Link></li>
-            <li><Link to="/cart" className="hover:text-indigo-400">Cart</Link></li>
+            <li>
+              <Link to="/" className="hover:text-indigo-400">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/products" className="hover:text-indigo-400">
+                Products
+              </Link>
+            </li>
+            <li>
+              <Link to="/about" className="hover:text-indigo-400">
+                About
+              </Link>
+            </li>
+            <li>
+              <Link to="/cart" className="hover:text-indigo-400">
+                Cart
+              </Link>
+            </li>
           </ul>
         </div>
 
         {/* HELP */}
         <div>
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Help
-          </h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Help</h3>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/orders" className="hover:text-indigo-400">My Orders</Link></li>
-            <li><Link to="/checkout" className="hover:text-indigo-400">Checkout</Link></li>
-            <li><span className="hover:text-indigo-400 cursor-pointer">Privacy Policy</span></li>
-            <li><span className="hover:text-indigo-400 cursor-pointer">Terms & Conditions</span></li>
+            <li>
+              <Link to="/orders" className="hover:text-indigo-400">
+                My Orders
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacy" className="hover:text-indigo-400">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link to="/terms" className="hover:text-indigo-400">
+                Terms & Conditions
+              </Link>
+            </li>
           </ul>
         </div>
 
-        {/* SOCIAL */}
+        {/* CONTACT */}
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">
-            Connect With Us
+            Contact With Us
           </h3>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-indigo-400">
-              <Facebook />
-            </a>
-            <a href="#" className="hover:text-indigo-400">
-              <Instagram />
-            </a>
-            <a href="#" className="hover:text-indigo-400">
-              <Twitter />
-            </a>
-            <a href="#" className="hover:text-indigo-400">
-              <Linkedin />
-            </a>
-          </div>
+          <ul className="space-y-2 text-sm">
+            <li>
+              <Link to="/contact" className="hover:text-indigo-400">
+                Contact Page
+              </Link>
+            </li>
+            <li className="text-gray-400">📧 support@shopzen.ai</li>
+            <li className="text-gray-400">📞 +91 6200790591</li>
+            <li className="text-gray-400">📍 Bangalore, India</li>
+          </ul>
         </div>
-
       </div>
 
       {/* BOTTOM BAR */}

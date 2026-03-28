@@ -29,15 +29,21 @@ import { AuthProvider } from "./context/AuthContext";
 import UserProtectedRoute from "./routes/UserProtectedRoute";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute";
 
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import Terms from "./components/Terms&Conditions";
+import Contact from "./pages/Contact";
+
+// ✅ TOAST IMPORT (ADDED)
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const AppContent = () => {
   const location = useLocation();
 
-  // ✅ Footer hide logic
   const hideFooter = location.pathname.startsWith("/products/");
 
   return (
     <>
-      {/* 🔥 GLOBAL SCROLL FIX */}
       <ScrollToTop />
 
       <Routes>
@@ -54,6 +60,9 @@ const AppContent = () => {
 
                   {/* PUBLIC */}
                   <Route path="/" element={<Home />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/contact" element={<Contact />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/products" element={<Products />} />
@@ -102,7 +111,6 @@ const AppContent = () => {
                 </Routes>
               </div>
 
-              {/* ✅ CONDITIONAL FOOTER */}
               {!hideFooter && <Footer />}
             </>
           }
@@ -130,6 +138,9 @@ const AppContent = () => {
         </Route>
 
       </Routes>
+
+      {/* ✅ TOAST CONTAINER (ADDED) */}
+      <ToastContainer position="top-center" autoClose={2000} />
     </>
   );
 };

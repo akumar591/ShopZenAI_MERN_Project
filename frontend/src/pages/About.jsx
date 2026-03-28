@@ -1,4 +1,5 @@
-import { Brain, Sparkles, ShieldCheck, ShoppingCart } from "lucide-react";
+import { Brain, Sparkles, ShieldCheck, ShoppingCart, FileText, Lock } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const features = [
   {
@@ -27,7 +28,7 @@ const About = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
 
-      {/* HERO SECTION */}
+      {/* HERO */}
       <section className="relative h-[320px] md:h-[420px]">
         <img
           src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80&auto=format&fit=crop"
@@ -51,35 +52,24 @@ const About = () => {
       {/* WHO WE ARE */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-          
-          {/* Image */}
-          <div>
-            <img
-              src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=900&q=80&auto=format&fit=crop"
-              alt="team"
-              className="rounded-xl shadow-lg"
-            />
-          </div>
+          <img
+            src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=900&q=80&auto=format&fit=crop"
+            alt="team"
+            className="rounded-xl shadow-lg"
+          />
 
-          {/* Content */}
           <div>
             <h2 className="text-3xl font-bold text-gray-900">
               Who We Are
             </h2>
             <p className="mt-4 text-gray-600 leading-relaxed">
               ShopZen AI is a modern e-commerce frontend project focused on
-              delivering a smarter, faster and more personalized shopping
-              experience. The platform is designed with AI-first thinking,
-              clean UI principles and scalability in mind.
+              delivering a smarter, faster and more personalized shopping experience.
             </p>
-
             <p className="mt-4 text-gray-600">
-              This project demonstrates how AI-powered features like smart
-              search and recommendations can improve user experience in
-              real-world e-commerce platforms.
+              Built with AI-first thinking and scalable architecture.
             </p>
           </div>
-
         </div>
       </section>
 
@@ -105,6 +95,60 @@ const About = () => {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 🔥 LEGAL / POLICIES SECTION */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-6">
+
+          <h2 className="text-3xl font-bold text-center text-gray-900">
+            Legal & Policies
+          </h2>
+
+          <p className="text-center text-gray-600 mt-3">
+            Transparency and trust are important to us.
+          </p>
+
+          <div className="mt-10 grid md:grid-cols-2 gap-8">
+
+            {/* Privacy */}
+            <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
+              <Lock className="text-indigo-600 mb-4" size={28} />
+              <h3 className="text-lg font-semibold text-gray-900">
+                Privacy Policy
+              </h3>
+              <p className="text-gray-600 mt-2 text-sm">
+                Learn how we collect, use and protect your personal data.
+              </p>
+
+              <Link
+                to="/privacy"
+                className="inline-block mt-4 text-indigo-600 font-medium hover:underline"
+              >
+                Read More →
+              </Link>
+            </div>
+
+            {/* Terms */}
+            <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
+              <FileText className="text-indigo-600 mb-4" size={28} />
+              <h3 className="text-lg font-semibold text-gray-900">
+                Terms & Conditions
+              </h3>
+              <p className="text-gray-600 mt-2 text-sm">
+                Understand the rules and guidelines for using our platform.
+              </p>
+
+              <Link
+                to="/terms"
+                className="inline-block mt-4 text-indigo-600 font-medium hover:underline"
+              >
+                Read More →
+              </Link>
+            </div>
+
           </div>
         </div>
       </section>

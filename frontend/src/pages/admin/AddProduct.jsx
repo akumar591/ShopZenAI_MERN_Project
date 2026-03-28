@@ -68,6 +68,7 @@ const AddProduct = () => {
     category: "",
     subCategory: "",
     sizes: [],
+    bestSeller: false, // ✅ ADDED
   });
 
   const [images, setImages] = useState({});
@@ -89,7 +90,6 @@ const AddProduct = () => {
 
     if (form.category === "watches") return ["Small", "Medium", "Large"];
 
-    // ✅ NEW: Grocery Smart Sizes
     if (form.category === "grocery") {
       const sub = form.subCategory;
 
@@ -180,14 +180,13 @@ const AddProduct = () => {
   };
 
   const handleSave = async () => {
-    // ✅ REQUIRED VALIDATION (ADDED)
     if (
       !form.name ||
       !form.description ||
       !form.price ||
       !form.category ||
       !form.subCategory ||
-      Object.keys(images).length === 0 // ✅ IMAGE VALIDATION (NEW)
+      Object.keys(images).length === 0
     ) {
       return showMessage("All fields are required");
     }
@@ -201,6 +200,7 @@ const AddProduct = () => {
       Object.entries(form).forEach(([k, v]) => {
         if (k === "sizes") data.append("sizes", JSON.stringify(v));
         else if (k === "price") data.append("price", Number(v));
+        else if (k === "bestSeller") data.append("bestSeller", v); // ✅ ADDED
         else data.append(k, v);
       });
 
@@ -222,16 +222,15 @@ const AddProduct = () => {
           category: "",
           subCategory: "",
           sizes: [],
+          bestSeller: false, // ✅ ADDED
         });
 
         setImages({});
         setPreviews({});
       } else {
-        // ✅ ERROR MESSAGE (ADDED)
         showMessage(res.data.message || "Failed to save product");
       }
     } catch (err) {
-      // ✅ ERROR MESSAGE (ADDED)
       showMessage(err.response?.data?.message || "Failed to save product");
     } finally {
       setLoading(false);
@@ -350,6 +349,20 @@ const AddProduct = () => {
             />
           </div>
 
+          {/* ✅ BEST SELLER */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={form.bestSeller}
+              onChange={(e) =>
+                setForm({ ...form, bestSeller: e.target.checked })
+              }
+            />
+            <label className="text-sm text-gray-300">
+              Add to Best Seller
+            </label>
+          </div>
+
           {getSizes().length > 0 && (
             <div>
               <p className="text-xs text-gray-400">Sizes</p>
@@ -388,7 +401,6 @@ const AddProduct = () => {
   );
 };
 
-// CUSTOM DROPDOWN SAME
 const CustomDropdown = ({
   label,
   options,
