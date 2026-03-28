@@ -9,8 +9,6 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-
-  // ✅ NEW STATE (CONFIRM MODAL)
   const [confirmId, setConfirmId] = useState(null);
 
   const adminToken = localStorage.getItem("adminToken");
@@ -30,34 +28,56 @@ const ProductList = () => {
       if (res.data.success) {
         setProducts([...res.data.products].reverse());
       }
-    } catch {
+    } catch (err) {
+      console.log("FETCH ERROR:", err);
       showMessage("Failed to load products ❌");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= DELETE ================= */
+  /* ================= DELETE (FINAL FIXED) ================= */
   const deleteProduct = async (id) => {
     try {
+      if (!adminToken) {
+        showMessage("Unauthorized! Please login again ❌");
+        return;
+      }
+
+      console.log("Deleting product ID:", id);
+
       const res = await axios.post(
         "https://shopzenai-mern-project.onrender.com/api/product/remove",
-        { id },
+        {
+          _id: id, // ✅ IMPORTANT FIX
+        },
         {
           headers: {
             Authorization: `Bearer ${adminToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
 
+      console.log("DELETE RESPONSE:", res.data);
+
       if (res.data.success) {
+        // UI update instantly
         setProducts((prev) => prev.filter((p) => p._id !== id));
         showMessage("Product deleted successfully ✅");
+      } else {
+        showMessage(res.data.message || "Delete failed ❌");
       }
-    } catch {
-      showMessage("Delete failed ❌");
+    } catch (err) {
+      console.log("DELETE ERROR:", err.response?.data || err.message);
+
+      showMessage(
+        err.response?.data?.message ||
+        err.message ||
+        "Something went wrong ❌"
+      );
     } finally {
-      setConfirmId(null); // close modal
+      setConfirmId(null);
     }
   };
 
@@ -76,14 +96,14 @@ const ProductList = () => {
   return (
     <div className="text-gray-100 relative">
 
-      {/* 🔔 MESSAGE */}
+      {/* MESSAGE */}
       {message && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-green-600 px-4 py-2 rounded text-sm">
           {message}
         </div>
       )}
 
-      {/* ✅ CONFIRM MODAL (NEW) */}
+      {/* CONFIRM MODAL */}
       {confirmId && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999]">
           <div className="bg-[#020617] p-6 rounded-xl w-[90%] max-w-sm border border-white/10 text-center space-y-4">
@@ -145,11 +165,11 @@ const ProductList = () => {
             className="border-t border-white/10 hover:bg-white/5 transition"
           >
 
-            {/* DESKTOP */}
             <div className="hidden md:grid grid-cols-6 items-center px-4 py-3">
               <img
                 src={p.image?.[0]}
                 className="w-12 h-12 object-cover rounded"
+                alt="product"
               />
 
               <span className="text-sm font-medium truncate">
@@ -167,7 +187,7 @@ const ProductList = () => {
               </span>
 
               <button
-                onClick={() => setConfirmId(p._id)} // ✅ CHANGE
+                onClick={() => setConfirmId(p._id)}
                 className="flex justify-center text-red-400 hover:text-red-300"
               >
                 <Trash2 size={18} />
@@ -180,30 +200,22 @@ const ProductList = () => {
               <img
                 src={p.image?.[0]}
                 className="w-16 h-16 object-cover rounded"
+                alt="product"
               />
 
               <div className="flex-1 space-y-1">
-
-                <p className="font-semibold text-sm leading-tight">
-                  {p.name}
-                </p>
-
-                <p className="text-xs text-gray-400">
-                  ₹{p.price}
-                </p>
-
+                <p className="font-semibold text-sm">{p.name}</p>
+                <p className="text-xs text-gray-400">₹{p.price}</p>
                 <p className="text-xs text-gray-500">
                   {p.category} / {p.subCategory}
                 </p>
-
                 <p className="text-xs text-gray-500">
                   Sizes: {p.sizes?.join(", ") || "-"}
                 </p>
-
               </div>
 
               <button
-                onClick={() => setConfirmId(p._id)} // ✅ CHANGE
+                onClick={() => setConfirmId(p._id)}
                 className="text-red-400 mt-1"
               >
                 <Trash2 size={18} />
