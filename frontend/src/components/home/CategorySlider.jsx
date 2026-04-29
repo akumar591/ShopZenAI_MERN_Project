@@ -3,9 +3,9 @@ import {
   Shirt,
   Laptop,
   Watch,
-  ShoppingBag,
   Sparkles,
-  ShoppingCart,
+  Gem,        // ✅ Women (premium look)
+  Package     // ✅ Grocery (clean look)
 } from "lucide-react";
 
 const categories = [
@@ -18,7 +18,7 @@ const categories = [
   {
     id: 2,
     name: "Women",
-    icon: <ShoppingBag size={26} />,
+    icon: <Gem size={26} />, // ✅ UPDATED
     link: "/products?category=women",
   },
   {
@@ -42,7 +42,7 @@ const categories = [
   {
     id: 6,
     name: "Grocery",
-    icon: <ShoppingCart size={26} />,
+    icon: <Package size={26} />, // ✅ UPDATED
     link: "/products?category=grocery",
   },
 ];
@@ -66,9 +66,10 @@ const CategorySlider = () => {
                 hover:shadow-md
                 transition
                 group
+                cursor-pointer
               "
             >
-              <div className="text-indigo-600 group-hover:scale-110 transition">
+              <div className="text-indigo-600 group-hover:scale-110 transition duration-300">
                 {cat.icon}
               </div>
 
@@ -80,14 +81,7 @@ const CategorySlider = () => {
         </div>
 
         {/* DESKTOP VIEW */}
-        <div
-          className="
-            hidden md:flex
-            gap-4
-            justify-center
-            flex-wrap
-          "
-        >
+        <div className="hidden md:flex gap-4 justify-center flex-wrap">
           {categories.map((cat) => (
             <Link
               key={cat.id}
@@ -98,12 +92,13 @@ const CategorySlider = () => {
                 bg-white rounded-xl
                 px-3 py-4
                 shadow
-                hover:shadow-md
+                hover:shadow-lg
                 transition
                 group
+                cursor-pointer
               "
             >
-              <div className="text-indigo-600 group-hover:scale-110 transition">
+              <div className="text-indigo-600 group-hover:scale-110 transition duration-300">
                 {cat.icon}
               </div>
 

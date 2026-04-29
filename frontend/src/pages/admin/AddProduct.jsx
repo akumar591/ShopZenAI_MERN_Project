@@ -127,8 +127,18 @@ const AddProduct = () => {
   };
 
   const handleImage = async (key, file) => {
+    // ✅ file check
     if (!file) return;
 
+    // ✅ image validation (new)
+    if (!file.type.startsWith("image/")) {
+      return showMessage("Please upload a valid image");
+    }
+
+    // ✅ multiple request block (new)
+    if (aiLoading) return;
+
+    // existing logic (unchanged)
     setImages((p) => ({ ...p, [key]: file }));
     setPreviews((p) => ({ ...p, [key]: URL.createObjectURL(file) }));
 
@@ -137,28 +147,46 @@ const AddProduct = () => {
         setAiLoading(true);
 
         const fd = new FormData();
-        fd.append("image", file);
+        fd.append("image", file)
 
+        // ✅ improved axios (new)
         const res = await axios.post(
           "https://shopzenai-mern-project.onrender.com/api/ai/scan-image",
           fd,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            timeout: 20000,
+          },
         );
+        console.log("API RESPONSE 👉", res.data);
 
-        if (res.data?.success) {
-          const ai = res.data.result;
-
-          setForm((f) => ({
-            ...f,
-            name: ai.name || f.name,
-            description: ai.description || f.description,
-            category: ai.category || f.category,
-            subCategory: ai.subCategory || f.subCategory,
-          }));
-
-          showMessage("AI filled product details");
+        if (!res.data?.success) {
+          showMessage(res.data?.message || "AI failed");
+          return;
         }
-      } catch {
-        showMessage("AI scan failed");
+
+        const ai = res.data.result;
+
+        console.log("AI DATA 👉", ai);
+
+        setForm((f) => ({
+          ...f,
+          name: ai?.name || f.name,
+          description: ai?.description || f.description,
+        }));
+
+        showMessage("AI filled product details");
+      } catch (err) {
+        // ✅ better error handling (new)
+        console.error("AI ERROR 👉", err);
+
+        if (err.response?.status === 429) {
+          showMessage("Too many requests, wait few seconds");
+        } else {
+          showMessage("AI scan failed");
+        }
       } finally {
         setAiLoading(false);
       }
@@ -200,7 +228,8 @@ const AddProduct = () => {
       Object.entries(form).forEach(([k, v]) => {
         if (k === "sizes") data.append("sizes", JSON.stringify(v));
         else if (k === "price") data.append("price", Number(v));
-        else if (k === "bestSeller") data.append("bestSeller", v); // ✅ ADDED
+        else if (k === "bestSeller")
+          data.append("bestSeller", v); // ✅ ADDED
         else data.append(k, v);
       });
 
@@ -358,9 +387,7 @@ const AddProduct = () => {
                 setForm({ ...form, bestSeller: e.target.checked })
               }
             />
-            <label className="text-sm text-gray-300">
-              Add to Best Seller
-            </label>
+            <label className="text-sm text-gray-300">Add to Best Seller</label>
           </div>
 
           {getSizes().length > 0 && (
